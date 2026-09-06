@@ -1,0 +1,457 @@
+/* Shared styles for the simple listing pages (stay, camping, experiences). */
+
+.subHeading {
+  margin-bottom: 1.5rem;
+  max-width: 40ch;
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.chipRow li {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--mk-line);
+  background: var(--mk-white);
+  font-size: 0.85rem;
+}
+
+.note {
+  margin: 2rem 0 0;
+  color: var(--mk-text-muted);
+}
+
+.inlineCta {
+  font-weight: 700;
+  color: var(--mk-forest-600);
+}
+
+/* --- detail pages (/stay/[slug], /camping/[slug], /experiences/[slug]) --- */
+
+.detail {
+  padding-block: var(--space-section);
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mk-text-muted);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: var(--mk-forest-600);
+}
+
+.detailGrid {
+  display: grid;
+  gap: clamp(2rem, 5vw, 3.5rem);
+}
+
+@media (min-width: 960px) {
+  .detailGrid {
+    grid-template-columns: 1.2fr 1fr;
+    align-items: start;
+  }
+}
+
+.detailMedia {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.detailImage {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: var(--mk-sand-100);
+}
+
+.detailImage img {
+  object-fit: cover;
+}
+
+.thumbRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.6rem;
+}
+
+.thumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.thumb img {
+  object-fit: cover;
+}
+
+.detailBody {
+  display: grid;
+  gap: 1.1rem;
+  align-content: start;
+}
+
+.detailTitle {
+  margin: 0;
+  font-size: clamp(2.2rem, 6vw, 3.4rem);
+  color: var(--mk-forest-900);
+}
+
+.detailTagline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-style: italic;
+  color: var(--mk-text-muted);
+}
+
+.detailDescription {
+  margin: 0;
+  white-space: pre-line;
+  max-width: var(--measure);
+}
+
+.factList {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.25rem 1.4rem;
+  border-radius: var(--radius-md);
+  background: var(--mk-surface-alt);
+  border: 1px solid var(--mk-line);
+}
+
+.factList li {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  font-size: 0.95rem;
+}
+
+.factLabel {
+  min-width: 8.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mk-forest-600);
+}
+
+.priceLine {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--mk-forest-700);
+}
+
+.detailActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.primaryBtn,
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.85rem 1.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
+}
+
+.primaryBtn {
+  background: var(--mk-forest-600);
+  color: var(--mk-white);
+}
+
+.primaryBtn:hover {
+  background: var(--mk-forest-700);
+}
+
+.secondaryBtn {
+  border: 1.5px solid var(--mk-forest-600);
+  color: var(--mk-forest-700);
+}
+
+.secondaryBtn:hover {
+  background: var(--mk-forest-600);
+  color: var(--mk-white);
+}
+
+.availabilityNote {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--mk-text-muted);
+}
+
+/* --- camping page sections --- */
+
+.whyGrid {
+  display: grid;
+  gap: 1.1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 800px) {
+  .whyGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.whyCard {
+  padding: 1.6rem 1.5rem;
+  border-radius: var(--radius-lg);
+  background: var(--mk-white);
+  border: 1px solid var(--mk-line);
+}
+
+.whyTitle {
+  margin: 0 0 0.6rem;
+  font-size: 1.45rem;
+  color: var(--mk-forest-900);
+}
+
+.whyBody {
+  margin: 0;
+  font-size: 0.94rem;
+  color: var(--mk-text-muted);
+}
+
+.expectList {
+  display: grid;
+  gap: 0.7rem;
+  max-width: 56ch;
+}
+
+.expectList li {
+  position: relative;
+  padding-left: 1.8rem;
+  font-size: 1rem;
+}
+
+.expectList li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--mk-forest-600);
+  font-weight: 700;
+}
+
+.galleryTeaser {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 760px) {
+  .galleryTeaser {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.teaserFrame {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.teaserFrame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sectionMoreCenter {
+  margin: 1.75rem 0 0;
+  text-align: center;
+}
+
+.planCta {
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+  text-align: center;
+}
+
+.planBody {
+  margin: 0;
+  max-width: 52ch;
+  color: rgba(244, 241, 232, 0.9);
+}
+
+.planActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 0.75rem;
+}
+
+.secondaryBtnInverse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.85rem 1.6rem;
+  border-radius: 999px;
+  border: 1.5px solid rgba(244, 241, 232, 0.8);
+  color: var(--mk-text-inverse);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
+}
+
+.secondaryBtnInverse:hover {
+  background: rgba(244, 241, 232, 0.92);
+  color: var(--mk-forest-950);
+}
+
+/* --- experiences category filter --- */
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0.4rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid var(--mk-line-strong);
+  color: var(--mk-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background var(--dur) var(--ease-out), color var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out);
+}
+
+.filterChip:hover {
+  border-color: var(--mk-forest-600);
+  color: var(--mk-forest-700);
+}
+
+.filterChip[data-active="true"] {
+  background: var(--mk-forest-600);
+  border-color: var(--mk-forest-600);
+  color: var(--mk-white);
+}
+
+/* --- restaurant page --- */
+
+.splitRow {
+  display: grid;
+  gap: clamp(2rem, 5vw, 3.5rem);
+  align-items: center;
+}
+
+@media (min-width: 940px) {
+  .splitRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.splitMedia {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.splitMedia img {
+  object-fit: cover;
+}
+
+.splitBody {
+  margin: 1rem 0 0;
+  max-width: 52ch;
+  color: var(--mk-text-muted);
+}
+
+.atmosphereGrid {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 940px) {
+  .atmosphereGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.atmFrame {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.atmFrame img {
+  object-fit: cover;
+}
+
+@media (min-width: 940px) {
+  .atmFrame[data-wide="true"] {
+    grid-row: span 2;
+    aspect-ratio: auto;
+    height: 100%;
+  }
+}
+
+/* --- about page --- */
+
+.aboutBlock {
+  display: grid;
+  gap: 1rem;
+  max-width: 62ch;
+}
+
+.facilityGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.7rem;
+  margin-top: 1.75rem;
+}
+
+.facilityGrid li {
+  position: relative;
+  padding: 0.7rem 1rem 0.7rem 2rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--mk-line-inverse);
+  font-size: 0.92rem;
+}
+
+.facilityGrid li::before {
+  content: "✓";
+  position: absolute;
+  left: 0.8rem;
+  color: var(--mk-sand-500);
+  font-weight: 700;
+}

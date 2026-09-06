@@ -1,0 +1,164 @@
+.grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 700px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--mk-white);
+  border: 1px solid var(--mk-line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.media {
+  position: relative;
+  height: clamp(200px, 26vw, 260px);
+  background: var(--mk-sand-100);
+}
+
+.media img {
+  object-fit: cover;
+}
+
+.mediaFallback {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(140deg, var(--mk-sand-300), var(--mk-lake-100));
+}
+
+.badge {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(16, 31, 22, 0.82);
+  color: var(--mk-text-inverse);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.35rem 1.4rem 1.5rem;
+  flex: 1;
+}
+
+.name {
+  margin: 0;
+  font-size: 1.55rem;
+  color: var(--mk-forest-900);
+}
+
+.tagline {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--mk-text-muted);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  font-size: 0.85rem;
+  color: var(--mk-text);
+}
+
+.meta li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.amenities li {
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--mk-line);
+  background: var(--mk-sand-100);
+  font-size: 0.74rem;
+  color: var(--mk-text);
+}
+
+.footer {
+  margin-top: auto;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--mk-line);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+}
+
+.price {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--mk-forest-700);
+}
+
+.links {
+  display: inline-flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.detailLink,
+.bookLink {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.35rem 0;
+}
+
+.detailLink {
+  color: var(--mk-text-muted);
+}
+
+.detailLink:hover {
+  color: var(--mk-forest-700);
+}
+
+.bookLink {
+  color: var(--mk-forest-600);
+  border-bottom: 1.5px solid var(--mk-forest-600);
+}
+
+.bookLink:hover {
+  color: var(--mk-forest-700);
+}
+
+.empty {
+  max-width: var(--measure);
+  padding: 2.5rem;
+  border: 1px dashed var(--mk-line-strong);
+  border-radius: var(--radius-md);
+  color: var(--mk-text-muted);
+  text-align: center;
+}

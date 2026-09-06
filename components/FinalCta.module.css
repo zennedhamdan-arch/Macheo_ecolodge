@@ -1,0 +1,68 @@
+.section {
+  padding-block: var(--space-section);
+  background:
+    linear-gradient(rgba(16, 31, 22, 0.88), rgba(16, 31, 22, 0.92)),
+    url("/images/macheo/lake-mountains.jpg") center / cover no-repeat;
+  color: var(--mk-text-inverse);
+  text-align: center;
+}
+
+.inner {
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+}
+
+.headline {
+  margin: 0;
+  font-size: clamp(2.4rem, 7vw, 4.2rem);
+}
+
+.body {
+  margin: 0;
+  max-width: 54ch;
+  color: rgba(244, 241, 232, 0.9);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.85rem 1.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
+}
+
+.primary {
+  background: var(--mk-forest-600);
+  color: var(--mk-white);
+}
+
+.primary:hover {
+  background: var(--mk-forest-500);
+}
+
+.secondary {
+  border: 1.5px solid rgba(244, 241, 232, 0.8);
+  color: var(--mk-text-inverse);
+}
+
+.secondary:hover {
+  background: rgba(244, 241, 232, 0.92);
+  color: var(--mk-forest-950);
+}

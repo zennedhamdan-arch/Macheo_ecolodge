@@ -1,0 +1,151 @@
+.page {
+  min-height: 100vh;
+  background: var(--mk-cream);
+  color: var(--mk-text);
+}
+
+/* --- header ---------------------------------------------------------------- */
+
+.header {
+  border-bottom: 1px solid var(--mk-line);
+  background: var(--mk-cream);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headerInner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0.9rem var(--space-gutter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.home {
+  display: inline-flex;
+  color: var(--mk-forest-950);
+}
+
+.back {
+  font-size: 0.9rem;
+  color: var(--mk-text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out);
+}
+
+.back:hover,
+.back:focus-visible {
+  color: var(--mk-forest-950);
+  border-color: currentColor;
+}
+
+/* --- page body -------------------------------------------------------------- */
+
+.main {
+  padding: var(--space-section) 0;
+}
+
+.inner {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.eyebrow {
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mk-error);
+  font-weight: 600;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  line-height: 1.05;
+  color: var(--mk-forest-950);
+  margin: 0;
+}
+
+.lede {
+  max-width: 58ch;
+  color: var(--mk-text-muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* --- phone fallback --------------------------------------------------------- */
+
+.fallback {
+  border: 1px solid var(--mk-line);
+  border-radius: var(--radius-md);
+  background: var(--mk-surface-alt);
+  padding: clamp(1.5rem, 4vw, 3rem);
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+}
+
+.fallbackTitle {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.6rem;
+  color: var(--mk-forest-950);
+  margin: 0;
+}
+
+.fallbackBody {
+  margin: 0;
+  max-width: 56ch;
+  color: var(--mk-text-muted);
+  line-height: 1.6;
+}
+
+.fallbackActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .headerInner {
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+  }
+}
+
+.loading {
+  color: var(--mk-text-muted);
+}
+
+.fallbackButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.85rem 1.7rem;
+  border-radius: 999px;
+  background: var(--mk-forest-600);
+  color: var(--mk-white);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background var(--dur) var(--ease-out);
+}
+
+.fallbackButton:hover {
+  background: var(--mk-forest-700);
+}
+
+.fallbackNote {
+  margin: 0;
+  color: var(--mk-text-muted);
+}

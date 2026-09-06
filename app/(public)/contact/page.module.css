@@ -1,0 +1,78 @@
+.grid {
+  display: grid;
+  gap: clamp(2rem, 6vw, 4rem);
+}
+
+@media (min-width: 940px) {
+  .grid {
+    grid-template-columns: 1fr 1.4fr;
+    align-items: start;
+  }
+}
+
+.details {
+  display: grid;
+  gap: 1.25rem;
+  align-content: start;
+}
+
+.detailsTitle {
+  margin: 0;
+  font-size: 1.7rem;
+  color: var(--mk-forest-900);
+}
+
+.list {
+  display: grid;
+  gap: 1rem;
+}
+
+.item dt {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--mk-forest-600);
+  margin-bottom: 0.25rem;
+}
+
+.item dd {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.item dd a {
+  color: var(--mk-text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--mk-line-strong);
+}
+
+.item dd a:hover {
+  color: var(--mk-forest-600);
+  border-color: var(--mk-forest-600);
+}
+
+.hoursRow {
+  display: block;
+}
+
+.notice {
+  margin: 0;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--radius-md);
+  background: var(--mk-lake-100);
+  border: 1px solid rgba(42, 114, 149, 0.35);
+  font-size: 0.9rem;
+}
+
+.formCol {
+  min-width: 0;
+}
+
+.fallback {
+  padding: 2rem;
+  border: 1px dashed var(--mk-line-strong);
+  border-radius: var(--radius-lg);
+  display: grid;
+  gap: 0.8rem;
+}

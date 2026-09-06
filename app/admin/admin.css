@@ -1,0 +1,1134 @@
+/* ==========================================================================
+   Admin dashboard styles
+
+   Deliberately plain. This is a tool, not a showcase — the owner is standing
+   in a kitchen on a phone, and clarity beats atmosphere. It borrows the brand
+   palette so it feels like the same product, but nothing here is cinematic.
+
+   Not a CSS Module: these are broad, stable class names shared across every
+   admin page, and hashing them would only add indirection.
+   ========================================================================== */
+
+.admin-root {
+  --a-bg: #121814;
+  --a-surface: #1a221d;
+  --a-surface-2: #222c26;
+  --a-border: #2f3b34;
+  --a-text: #eef2ee;
+  --a-muted: #9aa89f;
+  --a-accent: #c8a45c;
+  --a-danger: #d4674a;
+  --a-success: #7fb069;
+
+  min-height: 100svh;
+  background: var(--a-bg);
+  color: var(--a-text);
+  font-family: var(--font-body, system-ui, sans-serif);
+  -webkit-text-size-adjust: 100%;
+}
+
+.admin-shell {
+  min-height: 100svh;
+}
+
+.admin-centered {
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+/* ------------------------------------------------- shell: topbar + sidebar */
+
+.admin-shell {
+  min-height: 100svh;
+}
+
+.admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem clamp(1rem, 4vw, 1.75rem);
+  background: rgba(18, 24, 20, 0.94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--a-border);
+}
+
+.admin-brand {
+  font-family: var(--font-display, serif);
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  color: var(--a-text);
+  text-decoration: none;
+}
+
+.admin-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-left: auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.admin-who {
+  font-size: 0.78rem;
+  color: var(--a-muted);
+  /* An email is long and not the point; never let it push the buttons off. */
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Hamburger: hidden on desktop, where the sidebar is permanent. */
+.admin-menu-button {
+  display: inline-grid;
+  gap: 4px;
+  padding: 0.55rem;
+  background: var(--a-surface);
+  border: 1px solid var(--a-border);
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.admin-menu-button span {
+  display: block;
+  width: 16px;
+  height: 1.6px;
+  background: var(--a-text);
+  border-radius: 2px;
+}
+
+/* Sidebar: off-canvas drawer on phones, fixed column on desktop. */
+.admin-sidebar {
+  position: fixed;
+  z-index: 40;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(17.5rem, 84vw);
+  padding: 1.1rem 0.9rem 1.5rem;
+  overflow-y: auto;
+  background: var(--a-surface);
+  border-right: 1px solid var(--a-border);
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+}
+
+.admin-sidebar[data-open="true"] {
+  transform: translateX(0);
+  box-shadow: 24px 0 60px rgba(0, 0, 0, 0.45);
+}
+
+.admin-nav-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  border: 0;
+  padding: 0;
+  background: rgba(8, 12, 9, 0.6);
+  cursor: pointer;
+}
+
+.admin-nav-group + .admin-nav-group {
+  margin-top: 1.4rem;
+}
+
+.admin-nav-group-title {
+  margin: 0 0 0.4rem;
+  padding: 0 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--a-muted);
+}
+
+.admin-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.admin-nav-link-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 9px;
+  font-size: 0.92rem;
+  color: var(--a-muted);
+  text-decoration: none;
+}
+
+.admin-nav-link-item svg {
+  flex: 0 0 auto;
+  opacity: 0.85;
+}
+
+.admin-nav-link-item:hover {
+  color: var(--a-text);
+  background: var(--a-surface-2);
+}
+
+.admin-nav-link-item[data-active="true"] {
+  color: var(--a-text);
+  background: var(--a-surface-2);
+  box-shadow: inset 2.5px 0 0 var(--a-accent);
+}
+
+.admin-nav-link-item:focus-visible {
+  outline: 2px solid var(--a-accent);
+  outline-offset: 1px;
+}
+
+.admin-nav-signout {
+  display: block;
+  padding: 0.35rem 0.65rem;
+}
+
+.admin-nav-group-system {
+  margin-top: 2rem !important;
+  padding-top: 1rem;
+  border-top: 1px solid var(--a-border);
+}
+
+/* Desktop: the sidebar is always visible and the content shifts right. */
+@media (min-width: 960px) {
+  .admin-menu-button {
+    display: none;
+  }
+
+  .admin-sidebar {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .admin-nav-backdrop {
+    display: none;
+  }
+
+  .admin-main {
+    margin-left: 17.5rem;
+  }
+}
+
+.admin-main {
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+/* -------------------------------------------------------------- blocks */
+
+.admin-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.85rem;
+}
+
+.admin-card {
+  background: var(--a-surface);
+  border: 1px solid var(--a-border);
+  border-radius: 14px;
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.admin-narrow {
+  width: min(26rem, 100%);
+}
+
+.admin-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.admin-eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--a-accent);
+}
+
+.admin-title {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display, serif);
+  font-weight: 300;
+  font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+  letter-spacing: -0.01em;
+}
+
+.admin-subtitle {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.admin-muted {
+  margin: 0 0 0.75rem;
+  color: var(--a-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.admin-lede {
+  max-width: 46ch;
+  margin-bottom: 1.5rem;
+}
+
+.admin-hint {
+  display: block;
+  margin: 0.35rem 0 0.75rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--a-muted);
+}
+
+.admin-quote {
+  margin: 0.5rem 0;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--a-border);
+  font-size: 0.88rem;
+  color: var(--a-muted);
+}
+
+.admin-code {
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: #0d120f;
+  border: 1px solid var(--a-border);
+  font-size: 0.78rem;
+  overflow-x: auto;
+}
+
+/* -------------------------------------------------------------- forms */
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.admin-label {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--a-muted);
+}
+
+/* -------------------------------------------------------------- form controls
+   ONE reusable style for every admin form control, applied at the element
+   level (scoped to .admin-root) so no field can ever fall back to the
+   browser's native white inputs and blue/yellow focus rings. Checkboxes and
+   radios keep their own rules below; file inputs are themed as far as the
+   browser allows. */
+
+.admin-root {
+  /* Makes the NATIVE parts the browser still draws — date-picker popup, time
+     spinner, select dropdown — render dark instead of white. */
+  color-scheme: dark;
+}
+
+.admin-root input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.admin-root textarea,
+.admin-root select,
+.admin-root .admin-input {
+  width: 100%;
+  /* 16px minimum: anything smaller makes iOS Safari zoom the page on focus. */
+  font-size: 16px;
+  font-family: inherit;
+  line-height: 1.45;
+  padding: 0.7rem 0.8rem;
+  color: var(--a-text);
+  background: var(--a-surface-2);
+  border: 1px solid var(--a-border);
+  border-radius: 9px;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+/* Remove the native chrome where it fights the theme. */
+.admin-root select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.2rem;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%239aa89f' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.8rem center;
+}
+
+.admin-root textarea {
+  resize: vertical;
+  min-height: 2.7rem;
+}
+
+/* Placeholder: muted grey-green, clearly quieter than entered text. */
+.admin-root input::placeholder,
+.admin-root textarea::placeholder {
+  color: var(--a-muted);
+  opacity: 1;
+}
+
+/* Hover: a slightly lighter surface, border still quiet. */
+.admin-root input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):hover:not(:disabled),
+.admin-root textarea:hover:not(:disabled),
+.admin-root select:hover:not(:disabled),
+.admin-root .admin-input:hover:not(:disabled) {
+  background: #26312a;
+  border-color: #3d4b41;
+}
+
+/* Focus: thin gold border + a very subtle gold glow. NEVER a white
+   background, never the browser default ring. Focus indicators stay —
+   they are just ours. */
+.admin-root input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+.admin-root input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus-visible,
+.admin-root textarea:focus,
+.admin-root textarea:focus-visible,
+.admin-root select:focus,
+.admin-root select:focus-visible,
+.admin-root .admin-input:focus,
+.admin-root .admin-input:focus-visible {
+  outline: none;
+  background: var(--a-surface-2);
+  border-color: var(--a-accent);
+  box-shadow: 0 0 0 3px rgba(200, 164, 92, 0.16);
+}
+
+/* Disabled: visibly inert, never white. */
+.admin-root input:disabled,
+.admin-root textarea:disabled,
+.admin-root select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: var(--a-surface);
+}
+
+/* Chrome's autofill paints a hard yellow and overrides the background —
+   force our surface back in and keep the text readable. */
+.admin-root input:-webkit-autofill,
+.admin-root input:-webkit-autofill:hover,
+.admin-root input:-webkit-autofill:focus,
+.admin-root textarea:-webkit-autofill,
+.admin-root select:-webkit-autofill {
+  -webkit-text-fill-color: var(--a-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--a-surface-2) inset;
+  caret-color: var(--a-text);
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* The little calendar/clock icons inside date and time inputs are dark-on-
+   transparent natively; flip them to match the dark surface. */
+.admin-root input[type="date"]::-webkit-calendar-picker-indicator,
+.admin-root input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.75) sepia(0.4) saturate(2) hue-rotate(2deg);
+  cursor: pointer;
+}
+
+.admin-root input[type="date"]::-webkit-datetime-edit,
+.admin-root input[type="time"]::-webkit-datetime-edit {
+  color: var(--a-text);
+}
+
+.admin-root input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+.admin-root input[type="time"]::-webkit-datetime-edit-fields-wrapper {
+  color: var(--a-text);
+}
+
+/* File inputs: the field itself stays the muted style; the inner button is
+   themed via its pseudo-element (the only part browsers allow). */
+.admin-root input[type="file"] {
+  width: 100%;
+  font-size: 0.9rem;
+  color: var(--a-muted);
+  padding: 0.45rem 0.5rem;
+  background: var(--a-surface-2);
+  border: 1px solid var(--a-border);
+  border-radius: 9px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.admin-root input[type="file"]::file-selector-button {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--a-text);
+  background: var(--a-surface);
+  border: 1px solid var(--a-border);
+  border-radius: 7px;
+  padding: 0.42rem 0.8rem;
+  margin-right: 0.7rem;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.admin-root input[type="file"]:hover {
+  border-color: #3d4b41;
+}
+
+.admin-root input[type="file"]::file-selector-button:hover {
+  background: #26312a;
+  border-color: var(--a-accent);
+}
+
+.admin-root input[type="file"]:focus-visible {
+  outline: none;
+  border-color: var(--a-accent);
+  box-shadow: 0 0 0 3px rgba(200, 164, 92, 0.16);
+}
+
+.admin-file {
+  width: 100%;
+  font-size: 0.85rem;
+  color: var(--a-muted);
+}
+
+.admin-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.admin-check-inline {
+  margin-top: 0;
+  align-items: center;
+}
+
+.admin-check input {
+  /* Comfortable touch target; the browser default is ~13px. */
+  width: 20px;
+  height: 20px;
+  margin-top: 0.1rem;
+  accent-color: var(--a-accent);
+}
+
+.admin-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.85rem;
+}
+
+/* -------------------------------------------------------------- buttons */
+
+.admin-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 44px is the smallest reliably tappable target. */
+  min-height: 44px;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #121814;
+  background: var(--a-accent);
+  border: 1px solid transparent;
+  border-radius: 9px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.admin-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.admin-button-quiet {
+  color: var(--a-text);
+  background: var(--a-surface-2);
+  border-color: var(--a-border);
+}
+
+.admin-button-danger {
+  color: var(--a-danger);
+  background: transparent;
+  border-color: var(--a-danger);
+}
+
+.admin-button:focus-visible,
+.admin-link:focus-visible,
+.admin-tab:focus-visible {
+  outline: 2px solid var(--a-accent);
+  outline-offset: 2px;
+}
+
+/* A styled <label> wrapping a hidden file input. */
+.admin-file-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-file-button input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.admin-link {
+  font-size: 0.82rem;
+  color: var(--a-muted);
+  background: none;
+  border: none;
+  padding: 0.35rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.admin-link:hover {
+  color: var(--a-text);
+}
+
+.admin-inline-link {
+  color: var(--a-accent);
+}
+
+/* -------------------------------------------------------------- feedback */
+
+.admin-error,
+.admin-success {
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: 9px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.admin-error {
+  color: #ffd9cf;
+  background: rgba(212, 103, 74, 0.16);
+  border: 1px solid rgba(212, 103, 74, 0.45);
+}
+
+.admin-success {
+  color: #dff0d4;
+  background: rgba(127, 176, 105, 0.14);
+  border: 1px solid rgba(127, 176, 105, 0.4);
+}
+
+/* -------------------------------------------------------------- stats */
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1rem;
+  background: var(--a-surface);
+  border: 1px solid var(--a-border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.admin-stat[data-highlight="true"] {
+  border-color: var(--a-accent);
+}
+
+.admin-stat-value {
+  font-size: 1.7rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-stat-label {
+  font-size: 0.76rem;
+  color: var(--a-muted);
+}
+
+/* -------------------------------------------------------------- tabs */
+
+.admin-tabs {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.3rem;
+  scrollbar-width: none;
+}
+
+.admin-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-tab {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.83rem;
+  color: var(--a-muted);
+  background: var(--a-surface);
+  border: 1px solid var(--a-border);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.admin-tab[data-selected="true"] {
+  color: #121814;
+  background: var(--a-accent);
+  border-color: var(--a-accent);
+}
+
+/* -------------------------------------------------------------- lists */
+
+.admin-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-list-compact {
+  gap: 0.6rem;
+}
+
+.admin-list-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--a-surface-2);
+  border: 1px solid var(--a-border);
+  border-radius: 12px;
+}
+
+.admin-list-item[data-active="true"] {
+  border-color: var(--a-accent);
+}
+
+.admin-list-item-row {
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-list-media {
+  flex: 0 0 auto;
+}
+
+.admin-list-body {
+  flex: 1 1 16rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.admin-list-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--a-muted);
+}
+
+.admin-badge {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #121814;
+  background: var(--a-accent);
+}
+
+.admin-item-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.6rem;
+}
+
+@media (min-width: 640px) {
+  .admin-item-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  .admin-field-wide {
+    grid-column: 1 / -1;
+  }
+}
+
+/* -------------------------------------------------------------- media */
+
+.admin-video-preview {
+  display: block;
+  width: 100%;
+  max-height: 22rem;
+  margin-bottom: 0.85rem;
+  border-radius: 10px;
+  background: #000;
+}
+
+.admin-thumb {
+  width: 9rem;
+  max-width: 40vw;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  background: #000;
+  object-fit: cover;
+}
+
+.admin-thumb-empty {
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  color: var(--a-muted);
+  background: var(--a-surface);
+  border: 1px dashed var(--a-border);
+}
+
+/* -------------------------------------------------------------- progress */
+
+.admin-progress {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--a-surface-2);
+  border: 1px solid var(--a-border);
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.admin-progress-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: rgba(200, 164, 92, 0.22);
+  transition: width 180ms linear;
+}
+
+.admin-progress-label {
+  position: relative;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-progress .admin-link {
+  position: relative;
+  margin-left: auto;
+}
+
+/* --- pickup orders --------------------------------------------------------- */
+
+.admin-order-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.admin-order-lines li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.admin-order-line-price {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--a-muted);
+  white-space: nowrap;
+}
+
+.admin-order-total {
+  margin: 0.35rem 0 0;
+  font-size: 1rem;
+}
+
+/* --- gallery ---------------------------------------------------------------- */
+
+.admin-gallery-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+/* Groups the reorder/delete controls away from Save and the publish toggle. */
+.admin-row-gap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .admin-row-gap {
+    margin-left: 0;
+  }
+}
+
+/* --- overview ---------------------------------------------------------------- */
+
+.admin-section-title {
+  font-size: 1.02rem;
+  font-weight: 600;
+  margin: 1.75rem 0 0.75rem;
+}
+
+.admin-overview-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 860px) {
+  .admin-overview-columns {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+}
+
+/* --- business settings hours rows --------------------------------------------- */
+
+.admin-hours-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 0.6rem;
+  align-items: end;
+  margin-bottom: 0.6rem;
+}
+
+@media (max-width: 640px) {
+  .admin-hours-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   TOTP step of the admin sign-in (LoginForm): a wide, letter-spaced code
+   field that reads well on a phone, and the one-time QR pairing block.
+--------------------------------------------------------------------------- */
+.admin-root .admin-input-code {
+  font-size: 1.6rem;
+  letter-spacing: 0.6em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-root .mfa-intro {
+  margin: 0 0 1rem;
+  line-height: 1.6;
+}
+
+.admin-root .mfa-qr {
+  display: flex;
+  justify-content: center;
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: #fff; /* the QR needs a light plate to scan in the dark theme */
+}
+
+.admin-root .mfa-secret {
+  word-break: break-word;
+}
+
+.admin-root .mfa-secret-value {
+  display: block;
+  margin-top: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  user-select: all;
+}
+
+/* ==========================================================================
+   Reservation management
+   ========================================================================== */
+
+.admin-res-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.admin-search {
+  flex: 1;
+  min-width: min(100%, 260px);
+  display: block;
+}
+
+.admin-search input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--admin-line, rgba(20, 32, 24, 0.18));
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.admin-search input:focus-visible {
+  outline: 2px solid #2f6647;
+  outline-offset: 2px;
+}
+
+.admin-res-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  width: 100%;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.admin-res-openhint {
+  margin-left: auto;
+  color: rgba(20, 32, 24, 0.55);
+}
+
+.admin-res-detail {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 0.75rem;
+  padding-top: 0.9rem;
+  border-top: 1px dashed rgba(20, 32, 24, 0.16);
+}
+
+.admin-res-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.6rem 1.2rem;
+}
+
+.admin-res-facts dt {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(20, 32, 24, 0.55);
+  margin-bottom: 0.15rem;
+}
+
+.admin-res-facts dd {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.admin-quote-label {
+  font-weight: 600;
+}
+
+/* Status-coloured badges */
+.admin-badge[data-status="pending"] { background: #f0e6cf; color: #6b5310; }
+.admin-badge[data-status="confirmed"] { background: #ddebdf; color: #2f6647; }
+.admin-badge[data-status="declined"] { background: #f3ddd7; color: #a2402a; }
+.admin-badge[data-status="cancelled"] { background: #e6e3dc; color: #5c6a5f; }
+.admin-badge[data-status="completed"] { background: #d9e9f0; color: #205e7c; }
+
+/* ==========================================================================
+   Shared manager components (accommodation, camping, content)
+   ========================================================================== */
+
+.admin-status {
+  margin: 0;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  background: #ddebdf;
+  border: 1px solid #2f6647;
+  color: #23512f;
+  font-size: 0.9rem;
+}
+
+.admin-card-summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.9rem 0.25rem;
+  list-style-position: inside;
+}
+
+.admin-card-body {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.admin-form-grid {
+  display: grid;
+  gap: 0.9rem 1.2rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 860px) {
+  .admin-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.admin-form-grid .admin-field {
+  margin: 0;
+}
+
+.admin-thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.7rem;
+}
+
+.admin-thumbs li {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.admin-thumbs img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(20, 32, 24, 0.14);
+}

@@ -1,0 +1,73 @@
+.wrap {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+
+@media (min-width: 940px) {
+  .wrap {
+    grid-template-columns: 1.15fr 1fr;
+  }
+}
+
+.images {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem;
+}
+
+.frame {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+
+.frame img {
+  object-fit: cover;
+}
+
+/* First image spans both columns and stands taller — the hero plate. */
+.frame[data-index="0"] {
+  grid-column: span 2;
+  aspect-ratio: 16 / 10;
+}
+
+.copy {
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+}
+
+.headline {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: var(--mk-forest-900);
+}
+
+.body {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--mk-text-muted);
+}
+
+.cta {
+  margin-top: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0.8rem 1.6rem;
+  border-radius: 999px;
+  background: var(--mk-forest-600);
+  color: var(--mk-white);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background var(--dur) var(--ease-out);
+}
+
+.cta:hover {
+  background: var(--mk-forest-700);
+}

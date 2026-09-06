@@ -1,0 +1,32 @@
+.more {
+  display: grid;
+  gap: 0.9rem;
+  justify-items: center;
+  margin-top: 2.5rem;
+}
+
+.count {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--mk-text-muted);
+}
+
+.button {
+  min-height: 48px;
+  padding: 0.8rem 1.8rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--mk-forest-600);
+  background: none;
+  color: var(--mk-forest-700);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
+}
+
+.button:hover {
+  background: var(--mk-forest-600);
+  color: var(--mk-white);
+}
