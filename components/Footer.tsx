@@ -149,10 +149,16 @@ export default async function Footer(): Promise<React.JSX.Element> {
                 className={styles.link}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={`${directionsAction.label} — opens Google Maps in a new tab`}
               >
                 {directionsAction.label}
               </a>
             ) : null}
+            {/* The map itself lives in the shared location section (homepage
+                and About) — one hop from the footer. */}
+            <Link href="/about#location" className={styles.link}>
+              View the map
+            </Link>
           </div>
         </div>
 

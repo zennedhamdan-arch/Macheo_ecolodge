@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, type RefObject } from "react";
 
+import SiteImage from "./SiteImage";
 import styles from "./GalleryGrid.module.css";
 
 /**
@@ -127,8 +128,12 @@ export default function GalleryLightbox({
       ) : null}
 
       <figure className={styles.lightboxFigure}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={styles.lightboxImage} src={current.src} alt={current.alt} />
+        <SiteImage
+          optimized={false}
+          className={styles.lightboxImage}
+          src={current.src}
+          alt={current.alt}
+        />
         {current.caption ? (
           <figcaption className={styles.lightboxCaption}>{current.caption}</figcaption>
         ) : null}

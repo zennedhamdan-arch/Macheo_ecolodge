@@ -930,47 +930,6 @@
   }
 }
 
-/* ---------------------------------------------------------------------------
-   TOTP step of the admin sign-in (LoginForm): a wide, letter-spaced code
-   field that reads well on a phone, and the one-time QR pairing block.
---------------------------------------------------------------------------- */
-.admin-root .admin-input-code {
-  font-size: 1.6rem;
-  letter-spacing: 0.6em;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-.admin-root .mfa-intro {
-  margin: 0 0 1rem;
-  line-height: 1.6;
-}
-
-.admin-root .mfa-qr {
-  display: flex;
-  justify-content: center;
-  margin: 0.75rem 0;
-  padding: 0.75rem;
-  border-radius: 12px;
-  background: #fff; /* the QR needs a light plate to scan in the dark theme */
-}
-
-.admin-root .mfa-secret {
-  word-break: break-word;
-}
-
-.admin-root .mfa-secret-value {
-  display: block;
-  margin-top: 0.4rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.25);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.95rem;
-  letter-spacing: 0.08em;
-  user-select: all;
-}
-
 /* ==========================================================================
    Reservation management
    ========================================================================== */
@@ -1068,16 +1027,6 @@
    Shared manager components (accommodation, camping, content)
    ========================================================================== */
 
-.admin-status {
-  margin: 0;
-  padding: 0.7rem 1rem;
-  border-radius: 8px;
-  background: #ddebdf;
-  border: 1px solid #2f6647;
-  color: #23512f;
-  font-size: 0.9rem;
-}
-
 .admin-card-summary {
   cursor: pointer;
   font-weight: 600;
@@ -1125,10 +1074,59 @@
   gap: 0.35rem;
 }
 
-.admin-thumbs img {
+.admin-thumbs img,
+.admin-thumbs .admin-thumb-fallback {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid rgba(20, 32, 24, 0.14);
+}
+
+/* Menu editor: the inline "add an item" row under each section's list, and a
+   smaller thumbnail for menu rows (a dish photo is a hint, not a hero). */
+.admin-add-inline {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--a-border);
+}
+
+.admin-thumb-small {
+  width: 6rem;
+  max-width: 32vw;
+  aspect-ratio: 4 / 3;
+  background: var(--a-surface);
+  border: 1px solid var(--a-border);
+}
+
+/* Loading state shown by app/admin/dashboard/loading.tsx while a section's
+   server queries run. */
+.admin-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 1.4rem 0.25rem;
+  font-size: 0.9rem;
+  color: var(--a-muted);
+}
+
+.admin-loading-spinner {
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  border: 2px solid var(--a-border);
+  border-top-color: var(--a-accent);
+  animation: admin-spin 0.75s linear infinite;
+}
+
+@keyframes admin-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-loading-spinner {
+    animation-duration: 2.4s;
+  }
 }

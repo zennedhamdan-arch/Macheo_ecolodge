@@ -20,7 +20,13 @@ export default async function AdminContactInfoPage(): Promise<React.JSX.Element>
 
   const [info, socials, settings, messages] = await Promise.all([
     supabase.from("business_info").select("*").eq("id", 1).maybeSingle().returns<BusinessInfoRow>(),
-    supabase.from("social_links").select("*").order("sort_order").returns<SocialLinkRow[]>(),
+    supabase
+      .from("social_links")
+      .select("*")
+      // Newest first, like every other admin list (see lib/adminSort).
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false })
+      .returns<SocialLinkRow[]>(),
     supabase.from("site_settings").select("*").eq("id", 1).maybeSingle().returns<SiteSettingsRow>(),
     supabase
       .from("contact_messages")

@@ -32,9 +32,10 @@ orients the next session.
   experiences manager, menu editor, gallery manager (upload/caption/alt/
   category/featured/reorder), site-content manager, contact-info manager
   (+ WhatsApp toggle), settings manager.
-- **Security**: `npm run db:test` → **63/63 checks pass** (anonymous
+- **Security**: `npm run db:test` → **76/76 checks pass** (anonymous
   visitor, signed-up intruder, allow-listed admin matrices against an
-  in-process Postgres running all seven migrations + seed).
+  in-process Postgres running all seven migrations + seed, plus the admin
+  list-ordering contract and the image types each storage bucket accepts).
 - **Build**: `next build` clean, 30 routes, First Load JS 104–116 kB.
 
 ## How it runs
@@ -46,9 +47,11 @@ npm run db:test        # security matrix
 npm run seed:generate  # regenerate seed from data/ (uses tsx, Node-20 safe)
 ```
 
-Static mode behaviour (no env vars): `data/*.ts` fallbacks power every page,
-forms show an honest "temporarily unavailable" note, the WhatsApp button and
-map embed hide themselves, `/admin*` redirects to `/admin/unavailable`.
+Static mode behaviour (no env vars): `data/*.ts` fallbacks power every page —
+including the confirmed Google Maps embed, which now renders without a
+database — forms show an honest "temporarily unavailable" note, the WhatsApp
+button hides itself (no number confirmed), and `/admin*` redirects to
+`/admin/unavailable`.
 
 With Supabase configured (`.env.local` from `.env.example`), everything is
 database-driven. The seed ships quiet on purpose: unpublished accommodation,
@@ -79,6 +82,31 @@ real offer.
 - The logo hook (`scripts/detect-logo.mjs`) intentionally still runs: no
   logo file exists, so the typographic wordmark is used; dropping
   `public/images/logo.png` in later is a zero-code change.
+
+## The admin/image pass (latest change)
+
+- **Authentication is email + password only.** The TOTP/AAL2 gate that used to
+  sit between the password and the dashboard is gone (`getAdminUser` no longer
+  calls `mfa.getAuthenticatorAssuranceLevel`, and the login form is one step).
+  Authorization is unchanged and still separate: the `admin_users` allow-list
+  plus RLS. No social login, no MFA, no customer accounts.
+- **Newest item first** on every CRUD screen (rooms, camping, experiences,
+  menu categories/sections/dishes, gallery, social links). Lists read
+  `sort_order asc, created_at desc`; a new row is inserted with
+  `sort_order = lowest - 1` via `lib/adminSort.ts`, so the database — not
+  array manipulation — puts it on top, and it stays there after a reload.
+  Reorder buttons still work. The menu editor also gained the add forms it
+  was missing (category, section, dish, dish photo).
+- **Images**: `images.remotePatterns` now allow-lists `*.supabase.co` in
+  `next.config.ts` — without it `next/image` throws on every admin-uploaded
+  photo. Public imagery goes through `components/SiteImage.tsx`, which
+  renders a neutral tile when a file is missing instead of a broken-image
+  glyph. Uploads keep their original format (a WebP stays a WebP) and are
+  recognised from the extension when the browser supplies no MIME type.
+- **Mobile menu**: the navbar's `backdrop-filter` was making the bar the
+  containing block for the fixed mobile panel, which squashed the menu into
+  the top strip once the visitor had scrolled. The blur is dropped while the
+  menu is open and the layering no longer relies on a negative z-index.
 
 ## Rules carried into any future work
 

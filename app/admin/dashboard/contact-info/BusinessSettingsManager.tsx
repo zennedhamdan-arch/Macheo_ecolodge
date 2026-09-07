@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { topSortOrder } from "@/lib/adminSort";
 import type {
   BusinessInfoRow,
   OpeningHourRow,
@@ -153,7 +154,6 @@ export default function BusinessSettingsManager({
     setError(null);
     try {
       const supabase = createSupabaseBrowserClient();
-      const nextSort = socials.reduce((max, row) => Math.max(max, row.sort_order), -1) + 1;
       const { data: inserted, error: insertError } = await supabase
         .from("social_links")
         .insert({
@@ -161,14 +161,15 @@ export default function BusinessSettingsManager({
           label: newSocial.label.trim(),
           url: newSocial.url.trim(),
           active: true,
-          sort_order: nextSort,
+          // Lowest sort_order minus one: the new link is first in the list.
+          sort_order: topSortOrder(socials),
         })
         .select()
         .single();
       if (insertError) throw insertError;
-      setSocials((current) => [...current, inserted]);
+      setSocials((current) => [inserted, ...current]);
       setNewSocial({ platform: "", label: "", url: "" });
-      setStatus("Social link added.");
+      setStatus("Social link added — it is at the top of the list.");
       router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Adding failed.");

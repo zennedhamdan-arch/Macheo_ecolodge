@@ -16,7 +16,14 @@ export default async function AdminAccommodationPage(): Promise<React.JSX.Elemen
     .from("accommodations")
     .select("*")
     .eq("kind", "room")
-    .order("sort_order")
+    /* Newest first: `sort_order` is the owner's display order, and a freshly
+       created room is inserted at the TOP of it (min - 1, see the manager),
+       so the item just written is the first thing on the page and can be
+       edited without scrolling past every older record. `created_at` is the
+       tie-break for rows that share a sort_order (the seed sets 0), which
+       keeps the order stable instead of arbitrary. */
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: false })
     .returns<AccommodationRow[]>();
 
   return (

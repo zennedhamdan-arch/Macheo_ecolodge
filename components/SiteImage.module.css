@@ -1,0 +1,48 @@
+/* Fallback tile shown when a stored image is missing or will not load.
+   Neutral by design: it must read as "no photo here", never as an error. */
+
+.fallback,
+.fallbackBox {
+  display: grid;
+  place-items: center;
+  color: var(--mk-forest-300, #7d9583);
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(31, 58, 41, 0.05) 0 10px,
+      rgba(31, 58, 41, 0.09) 10px 20px
+    ),
+    var(--mk-sand-100, #f0ebe0);
+  border: 1px solid var(--mk-line, rgba(31, 58, 41, 0.14));
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+/* next/image `fill` mode: the parent is already the positioned box. */
+.fallback {
+  position: absolute;
+  inset: 0;
+}
+
+/* Plain-<img> mode: the caller's class supplies the box (admin thumbnails). */
+.fallbackBox {
+  width: 100%;
+  height: 100%;
+  min-height: 3.5rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fallback,
+  .fallbackBox {
+    animation: siteImageSettle 240ms var(--ease-out, ease-out);
+  }
+}
+
+@keyframes siteImageSettle {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

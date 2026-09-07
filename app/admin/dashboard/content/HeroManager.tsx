@@ -8,6 +8,7 @@ import type { HeroMediaRow } from "@/lib/supabase/types";
 import {
   RESUMABLE_THRESHOLD_BYTES,
   buildObjectPath,
+  contentTypeFor,
   uploadFile,
   type UploadProgress,
 } from "@/lib/upload";
@@ -61,7 +62,8 @@ export default function HeroManager({
       setError(null);
       setStatus(null);
 
-      if (!VIDEO_TYPES.includes(file.type)) {
+      const type = contentTypeFor(file);
+      if (!type || !VIDEO_TYPES.includes(type)) {
         setError("Please choose an MP4, WebM or MOV file.");
         return;
       }
@@ -118,7 +120,8 @@ export default function HeroManager({
       setError(null);
       setStatus(null);
 
-      if (!POSTER_TYPES.includes(file.type)) {
+      const type = contentTypeFor(file);
+      if (!type || !POSTER_TYPES.includes(type)) {
         setError("Please choose a JPG, PNG or WebP image.");
         return;
       }

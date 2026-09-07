@@ -3,9 +3,16 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import SiteImage from "@/components/SiteImage";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { GalleryCategory, GalleryItemRow } from "@/lib/supabase/types";
-import { buildObjectPath, uploadFile, type UploadProgress } from "@/lib/upload";
+import { topSortOrder } from "@/lib/adminSort";
+import {
+  buildObjectPath,
+  contentTypeFor,
+  uploadFile,
+  type UploadProgress,
+} from "@/lib/upload";
 
 /**
  * Gallery manager.
@@ -57,7 +64,8 @@ export default function GalleryManager({
     setError(null);
     setStatus(null);
 
-    if (!IMAGE_TYPES.includes(file.type)) {
+    const type = contentTypeFor(file);
+    if (!type || !IMAGE_TYPES.includes(type)) {
       setError("Please choose a JPG, PNG, WebP or AVIF image.");
       return;
     }
@@ -82,9 +90,9 @@ export default function GalleryManager({
         onProgress: setProgress,
       });
 
-      const nextSort =
-        rows.reduce((max, row) => Math.max(max, row.sort_order), -1) + 1;
-
+      /* Lowest sort_order minus one: the database puts the newest photo
+         first, so it is the card you see — and can caption — without
+         scrolling past the rest of the archive. */
       const { data: inserted, error: insertError } = await supabase
         .from("gallery_items")
         .insert({
@@ -92,15 +100,15 @@ export default function GalleryManager({
           image_path: path,
           alt_text: altFromFileName(file.name),
           published: true,
-          sort_order: nextSort,
+          sort_order: topSortOrder(rows),
         })
         .select()
         .single();
 
       if (insertError) throw insertError;
 
-      setRows((current) => [...current, inserted]);
-      setStatus("Uploaded and live. Add a caption below.");
+      setRows((current) => [inserted, ...current]);
+      setStatus("Uploaded and live — it is at the top of the list. Add a caption below.");
       router.refresh();
     } catch (caught) {
       setError(
@@ -313,12 +321,12 @@ function GalleryCard({
   return (
     <li className="admin-list-item">
       <div className="admin-list-item-row">
-        {/* A plain <img> on purpose: these are admin-uploaded images served
-            from Supabase's CDN, and this page is dynamic and behind auth, so
-            next/image optimisation would add cost and config (remotePatterns)
-            without buying anything here. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="admin-thumb" src={row.image_url} alt={row.alt_text} loading="lazy" />
+        {/* A plain <img> (SiteImage, unoptimised): these are admin-uploaded
+            images served from Supabase's CDN, and this page is dynamic and
+            behind auth, so next/image optimisation would add cost without
+            buying anything here. A file that will not load shows a neutral
+            tile instead of a broken-image glyph. */}
+        <SiteImage optimized={false} className="admin-thumb" src={row.image_url} alt={row.alt_text} />
 
         <div className="admin-list-body">
           <div className="admin-item-grid">

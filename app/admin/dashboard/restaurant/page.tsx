@@ -5,14 +5,30 @@ import MenuEditor from "./MenuEditor";
 export default async function AdminRestaurantPage(): Promise<React.JSX.Element> {
   const supabase = await createSupabaseServerClient();
 
+  /* Newest first everywhere: `sort_order` is the menu's display order and a
+     newly added category / section / dish is inserted at the TOP of it, so
+     what was just created is the first thing on screen and can be edited
+     straight away. `created_at` descending breaks ties between rows that
+     share a sort_order. */
   const [categories, sections, items] = await Promise.all([
     supabase
       .from("menu_categories")
       .select("*")
-      .order("sort_order")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false })
       .returns<MenuCategoryRow[]>(),
-    supabase.from("menu_sections").select("*").order("sort_order").returns<MenuSectionRow[]>(),
-    supabase.from("menu_items").select("*").order("sort_order").returns<MenuItemRow[]>(),
+    supabase
+      .from("menu_sections")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false })
+      .returns<MenuSectionRow[]>(),
+    supabase
+      .from("menu_items")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false })
+      .returns<MenuItemRow[]>(),
   ]);
 
   return (

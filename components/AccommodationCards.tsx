@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import SiteImage from "@/components/SiteImage";
 import type { AccommodationRow } from "@/lib/supabase/types";
 import { formatPrice } from "@/lib/content";
 import styles from "./AccommodationCards.module.css";
@@ -40,16 +40,12 @@ export default function AccommodationCards({
         return (
           <li key={row.id} className={styles.card}>
             <div className={styles.media}>
-              {image ? (
-                <Image
-                  src={image}
-                  alt={`${row.name} at Macheo Ecolodge & Camping`}
-                  fill
-                  sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
-                />
-              ) : (
-                <div className={styles.mediaFallback} aria-hidden="true" />
-              )}
+              <SiteImage
+                src={image}
+                alt={`${row.name} at Macheo Ecolodge & Camping`}
+                fill
+                sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
+              />
               {!row.available ? (
                 <span className={styles.badge} data-tone="quiet">
                   Currently unavailable

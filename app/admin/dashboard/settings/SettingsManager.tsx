@@ -56,7 +56,7 @@ export default function SettingsManager({
       <h2 className="admin-card-title">Site settings</h2>
 
       {status ? (
-        <p className="admin-status" role="status">
+        <p className="admin-success" role="status">
           {status}
         </p>
       ) : null}

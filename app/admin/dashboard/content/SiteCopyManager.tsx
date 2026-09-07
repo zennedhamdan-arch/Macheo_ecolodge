@@ -93,7 +93,7 @@ const FIELDS: readonly {
   {
     key: "map_embed_url",
     label: "Google Maps embed URL (Location section)",
-    hint: "Only set this once the exact official location is confirmed. Leave empty to show the placeholder panel instead.",
+    hint: "The confirmed Macheo pin (Google Maps, Karongi) is built in and shows on the homepage and the About page. Paste a different embed URL here to replace it — leave empty to keep the built-in one.",
   },
 ];
 
@@ -148,7 +148,7 @@ export default function SiteCopyManager({
       <h2 className="admin-card-title">Page copy</h2>
 
       {status ? (
-        <p className="admin-status" role="status">
+        <p className="admin-success" role="status">
           {status}
         </p>
       ) : null}
