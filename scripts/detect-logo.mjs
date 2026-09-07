@@ -18,12 +18,24 @@
  */
 
 import { existsSync } from "node:fs";
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import sharp from "sharp";
+import { fileURLToPath } from "node:url";
 
-const IMAGES_DIR = path.join(process.cwd(), "public", "images");
-const OUT_FILE = path.join(process.cwd(), "data", "logo.generated.ts");
+/**
+ * The project root, resolved from THIS FILE's location (`scripts/..`) rather
+ * than `process.cwd()`.
+ *
+ * The build platform chooses the working directory, not us: locally it is the
+ * repo, on Vercel it is /vercel/path0, and a monorepo install may run the
+ * script from somewhere else entirely. Anchoring to the script itself means
+ * `public/images` and `data/logo.generated.ts` are found wherever it runs,
+ * with no platform-specific path anywhere.
+ */
+const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+const IMAGES_DIR = path.join(PROJECT_ROOT, "public", "images");
+const OUT_FILE = path.join(PROJECT_ROOT, "data", "logo.generated.ts");
 
 /** Preference order: vector first, then lossless, then lossy. */
 const CANDIDATES = ["logo.svg", "logo.png", "logo.webp", "logo.jpg", "logo.jpeg"];
@@ -42,6 +54,18 @@ export type DetectedLogo = {
 `;
 
 async function main() {
+  /* `fs.writeFile` does not create parent directories, so writing straight
+     into data/ fails with ENOENT whenever that folder is absent — a fresh
+     build container is exactly that case, and this is what broke the Vercel
+     prebuild. `recursive: true` is a no-op when the directory already
+     exists, so this is safe to run on every build.
+
+     The generated module is also committed to Git: data/site.ts imports it,
+     so `npm run typecheck` on a fresh clone works before any build has run.
+     This script regenerates it either way — the build never depends on the
+     committed copy being present. */
+  await mkdir(path.dirname(OUT_FILE), { recursive: true });
+
   const found = CANDIDATES.find((name) => existsSync(path.join(IMAGES_DIR, name)));
 
   if (!found) {
@@ -55,6 +79,10 @@ async function main() {
   }
 
   const file = path.join(IMAGES_DIR, found);
+  // Imported lazily: with no logo file there is nothing to measure, and the
+  // script must not fail (or need sharp's native binary at all) on the path
+  // that every build without a logo takes.
+  const { default: sharp } = await import("sharp");
   const meta = await sharp(file).metadata();
 
   const width = meta.width ?? 512;
