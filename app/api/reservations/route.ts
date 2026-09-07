@@ -8,6 +8,7 @@ import {
   TurnstileConfigError,
   clientIp,
   turnstileMisconfigured,
+  turnstileRequired,
   verifyTurnstileToken,
 } from "@/lib/turnstile";
 
@@ -71,37 +72,45 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Malformed request." }, { status: 400 });
   }
 
-  if (turnstileMisconfigured()) {
-    return NextResponse.json(
-      {
-        error:
-          "Anti-bot protection is misconfigured on the server. Please call or WhatsApp us — the number is on the site.",
-      },
-      { status: 503 },
-    );
-  }
-
-  const turnstileToken = asString(payload.turnstileToken);
-  if (!turnstileToken) {
-    return NextResponse.json({ error: "Please complete the anti-bot check." }, { status: 400 });
-  }
-
-  try {
-    const human = await verifyTurnstileToken(turnstileToken, clientIp(request));
-    if (!human) {
+  /* Turnstile is OPTIONAL here: it applies only when the public site key is
+     configured, which is the only case where the widget renders and a guest
+     can obtain a token. Skipping it when unconfigured weakens no
+     authorization — every field below is still validated and the insert
+     still runs under the anon key, so RLS, the column grants and the
+     date-window policy remain the enforcement. */
+  if (turnstileRequired()) {
+    if (turnstileMisconfigured()) {
       return NextResponse.json(
-        { error: "The anti-bot check didn't pass. Please try again." },
-        { status: 400 },
+        {
+          error:
+            "Anti-bot protection is misconfigured on the server. Please call or WhatsApp us — the number is on the site.",
+        },
+        { status: 503 },
       );
     }
-  } catch (error) {
-    if (error instanceof TurnstileConfigError) {
-      return NextResponse.json({ error: error.message }, { status: 503 });
+
+    const turnstileToken = asString(payload.turnstileToken);
+    if (!turnstileToken) {
+      return NextResponse.json({ error: "Please complete the anti-bot check." }, { status: 400 });
     }
-    return NextResponse.json(
-      { error: "The anti-bot check could not be reached. Please try again." },
-      { status: 502 },
-    );
+
+    try {
+      const human = await verifyTurnstileToken(turnstileToken, clientIp(request));
+      if (!human) {
+        return NextResponse.json(
+          { error: "The anti-bot check didn't pass. Please try again." },
+          { status: 400 },
+        );
+      }
+    } catch (error) {
+      if (error instanceof TurnstileConfigError) {
+        return NextResponse.json({ error: error.message }, { status: 503 });
+      }
+      return NextResponse.json(
+        { error: "The anti-bot check could not be reached. Please try again." },
+        { status: 502 },
+      );
+    }
   }
 
   // ---- Field validation (mirrors the form; the database re-checks all of it) ----

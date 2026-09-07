@@ -18,21 +18,26 @@ export default function ContactInbox({
   const router = useRouter();
   const [rows, setRows] = useState<readonly ContactMessageRow[]>(initial);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function toggleRead(row: ContactMessageRow): Promise<void> {
     setBusyId(row.id);
+    setError(null);
     try {
       const supabase = createSupabaseBrowserClient();
-      await supabase
+      const { error: updateError } = await supabase
         .from("contact_messages")
         .update({ is_read: !row.is_read })
         .eq("id", row.id);
+      if (updateError) throw updateError;
       setRows((current) =>
         current.map((candidate) =>
           candidate.id === row.id ? { ...candidate, is_read: !row.is_read } : candidate,
         ),
       );
       router.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not update the message.");
     } finally {
       setBusyId(null);
     }
@@ -41,22 +46,45 @@ export default function ContactInbox({
   async function remove(row: ContactMessageRow): Promise<void> {
     if (!window.confirm("Delete this message? This cannot be undone.")) return;
     setBusyId(row.id);
+    setError(null);
     try {
       const supabase = createSupabaseBrowserClient();
-      await supabase.from("contact_messages").delete().eq("id", row.id);
+      const { error: deleteError } = await supabase
+        .from("contact_messages")
+        .delete()
+        .eq("id", row.id);
+      if (deleteError) throw deleteError;
       setRows((current) => current.filter((candidate) => candidate.id !== row.id));
       router.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not delete the message.");
     } finally {
       setBusyId(null);
     }
   }
 
+  const banner = error ? (
+    <p className="admin-error" role="alert">
+      {error}
+    </p>
+  ) : null;
+
   if (rows.length === 0) {
-    return <p className="admin-muted">No messages yet.</p>;
+    return (
+      <>
+        {banner}
+        <p className="admin-muted">
+          No messages yet — anything a visitor sends through the contact form
+          lands here.
+        </p>
+      </>
+    );
   }
 
   return (
-    <ul className="admin-list">
+    <>
+      {banner}
+      <ul className="admin-list">
       {rows.map((row) => (
         <li key={row.id} className="admin-list-item" data-active={row.is_read ? "false" : "true"}>
           <div className="admin-list-body">
@@ -104,6 +132,7 @@ export default function ContactInbox({
           </div>
         </li>
       ))}
-    </ul>
+      </ul>
+    </>
   );
 }

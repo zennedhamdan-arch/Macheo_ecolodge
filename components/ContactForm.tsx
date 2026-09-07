@@ -168,15 +168,10 @@ export default function ContactForm({
         />
       </label>
 
+      {/* As on the reservation form: optional, and invisible when unused. */}
       {turnstileSiteKey ? (
         <Turnstile siteKey={turnstileSiteKey} onToken={setTurnstileToken} />
-      ) : (
-        <p className="captcha-note">
-          Anti-bot protection is not configured on this server — submissions
-          may be disabled. If the form does not work, please call or WhatsApp
-          us instead.
-        </p>
-      )}
+      ) : null}
 
       {errorMessage ? (
         <p className={styles.error} role="alert">

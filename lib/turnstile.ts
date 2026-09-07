@@ -3,8 +3,13 @@
  *
  * The SITE key is public; the SECRET lives only in the server environment.
  * A browser-supplied token is never trusted until it has been re-verified
- * here, and the check fails CLOSED: in production, a missing secret stops
- * submissions instead of silently skipping protection.
+ * here.
+ *
+ * Turnstile is OPTIONAL in this project (see `turnstileRequired`): it applies
+ * only when the public site key exists, because that is the only case where
+ * the widget can render and a guest can obtain a token. When it IS in play it
+ * still fails closed — a missing secret stops submissions rather than
+ * silently skipping protection.
  */
 
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
@@ -35,6 +40,19 @@ export async function verifyTurnstileToken(
   if (!response.ok) return false;
   const outcome = (await response.json()) as { success?: boolean };
   return outcome.success === true;
+}
+
+/**
+ * Is the anti-bot check in play at all?
+ *
+ * False when no public site key is configured — the widget cannot render, so
+ * no guest could ever produce a token and requiring one would make the form
+ * unusable. The routes then skip the token check but still run every field
+ * validation and insert under the anon key, so RLS, the column grants and the
+ * date-window policy continue to do the enforcing.
+ */
+export function turnstileRequired(): boolean {
+  return Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
 }
 
 /** True when the secret exists but the public site key was absent at build

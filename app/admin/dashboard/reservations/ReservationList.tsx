@@ -42,6 +42,8 @@ export default function ReservationList({
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const visible = useMemo(() => {
     const byStatus =
@@ -56,12 +58,27 @@ export default function ReservationList({
     );
   }, [initial, filter, query]);
 
-  async function setStatus(id: string, status: ReservationStatus): Promise<void> {
+  /**
+   * supabase-js RESOLVES with `{ error }` instead of throwing, so an unchecked
+   * update looks like success in the UI while the row never changed (an
+   * expired session, a revoked admin). Every write here is checked and
+   * reported.
+   */
+  async function setStatus(id: string, next: ReservationStatus): Promise<void> {
     setBusyId(id);
+    setError(null);
+    setNotice(null);
     try {
       const supabase = createSupabaseBrowserClient();
-      await supabase.from("reservation_requests").update({ status }).eq("id", id);
+      const { error: updateError } = await supabase
+        .from("reservation_requests")
+        .update({ status: next })
+        .eq("id", id);
+      if (updateError) throw updateError;
+      setNotice(`Marked ${next}.`);
       router.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not update the status.");
     } finally {
       setBusyId(null);
     }
@@ -69,13 +86,19 @@ export default function ReservationList({
 
   async function saveNotes(id: string, notes: string): Promise<void> {
     setBusyId(id);
+    setError(null);
+    setNotice(null);
     try {
       const supabase = createSupabaseBrowserClient();
-      await supabase
+      const { error: updateError } = await supabase
         .from("reservation_requests")
         .update({ admin_notes: notes.trim().length > 0 ? notes : null })
         .eq("id", id);
+      if (updateError) throw updateError;
+      setNotice("Internal notes saved.");
       router.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not save the notes.");
     } finally {
       setBusyId(null);
     }
@@ -83,6 +106,17 @@ export default function ReservationList({
 
   return (
     <div className="admin-stack">
+      {error ? (
+        <p className="admin-error" role="alert">
+          {error}
+        </p>
+      ) : null}
+      {notice ? (
+        <p className="admin-success" role="status">
+          {notice}
+        </p>
+      ) : null}
+
       <div className="admin-res-toolbar">
         <div className="admin-tabs" role="tablist" aria-label="Filter by status">
           {(["all", ...STATUSES] as const).map((value) => (
