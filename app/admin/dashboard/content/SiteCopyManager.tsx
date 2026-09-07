@@ -148,7 +148,7 @@ export default function SiteCopyManager({
       <h2 className="admin-card-title">Page copy</h2>
 
       {status ? (
-        <p className="admin-status" role="status">
+        <p className="admin-success" role="status">
           {status}
         </p>
       ) : null}

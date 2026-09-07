@@ -3,9 +3,16 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import SiteImage from "@/components/SiteImage";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { AccommodationKind, AccommodationRow } from "@/lib/supabase/types";
-import { buildObjectPath, uploadFile, type UploadProgress } from "@/lib/upload";
+import { topSortOrder } from "@/lib/adminSort";
+import {
+  buildObjectPath,
+  contentTypeFor,
+  uploadFile,
+  type UploadProgress,
+} from "@/lib/upload";
 
 /**
  * Accommodation & camping manager (one component, two sections).
@@ -99,7 +106,7 @@ export default function AccommodationManager({
   return (
     <div className="admin-stack">
       {status ? (
-        <p className="admin-status" role="status">
+        <p className="admin-success" role="status">
           {status}
         </p>
       ) : null}
@@ -109,11 +116,26 @@ export default function AccommodationManager({
         </p>
       ) : null}
 
-      <AddForm kind={kind} noun={noun} onCreated={(row) => {
-        setRows((current) => [...current, row]);
-        setStatus(`${noun[0]?.toUpperCase()}${noun.slice(1)} created${row.published ? " — it is live on the site" : " (not published yet)"}.`);
-        router.refresh();
-      }} busy={busyId === "new"} setBusy={(busy) => setBusyId(busy ? "new" : null)} setError={setError} nextSort={rows.reduce((max, row) => Math.max(max, row.sort_order), -1) + 1} />
+      <AddForm
+        kind={kind}
+        noun={noun}
+        /* The new row goes to the TOP of the list, matching the order the
+           database returns on the next render — so the item you just created
+           is the first card on the page and can be edited immediately. */
+        onCreated={(row) => {
+          setRows((current) => [row, ...current]);
+          setStatus(
+            `${noun[0]?.toUpperCase()}${noun.slice(1)} created — it is at the top of this list${
+              row.published ? " and live on the site" : " (not published yet)"
+            }.`,
+          );
+          router.refresh();
+        }}
+        busy={busyId === "new"}
+        setBusy={(busy) => setBusyId(busy ? "new" : null)}
+        setError={setError}
+        topSort={topSortOrder(rows)}
+      />
 
       {rows.length === 0 ? (
         <p className="admin-muted">
@@ -148,7 +170,7 @@ function AddForm({
   setBusy,
   setError,
   onCreated,
-  nextSort,
+  topSort,
 }: Readonly<{
   kind: AccommodationKind;
   noun: string;
@@ -156,7 +178,8 @@ function AddForm({
   setBusy: (busy: boolean) => void;
   setError: (message: string | null) => void;
   onCreated: (row: AccommodationRow) => void;
-  nextSort: number;
+  /** Lowest sort_order minus one: puts the new row first (lib/adminSort). */
+  topSort: number;
 }>): React.JSX.Element {
   const [name, setName] = useState("");
   const [tagline, setTagline] = useState("");
@@ -167,12 +190,18 @@ function AddForm({
   const [tentInfo, setTentInfo] = useState("");
   const [price, setPrice] = useState("");
   const [files, setFiles] = useState<readonly File[]>([]);
+  const [progress, setProgress] = useState<UploadProgress | null>(null);
+  const [uploadedCount, setUploadedCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   function pickFiles(list: FileList | null): void {
     if (!list) return;
     const chosen = Array.from(list).filter((file) => {
-      if (!IMAGE_TYPES.includes(file.type)) {
+      /* `file.type` is empty for some Android pickers even on a perfectly
+         good photo, so the extension is the fallback — otherwise a valid
+         WebP would be refused for no real reason. */
+      const type = contentTypeFor(file);
+      if (!type || !IMAGE_TYPES.includes(type)) {
         setError(`"${file.name}" is not a supported image (JPEG, PNG, WebP or AVIF).`);
         return false;
       }
@@ -196,12 +225,20 @@ function AddForm({
     try {
       const supabase = createSupabaseBrowserClient();
 
-      /* Upload images first so the row can carry their URLs. */
+      /* Upload images first so the row can carry their URLs. Each one is
+         stored in the `stays` bucket and its public Storage URL is what gets
+         saved — never a link to some external host. */
       const urls: string[] = [];
       for (const file of files) {
         const path = buildObjectPath(kind === "camping" ? "camping" : "rooms", file);
-        const result = await uploadFile(supabase, { bucket: "stays", file, path });
+        const result = await uploadFile(supabase, {
+          bucket: "stays",
+          file,
+          path,
+          onProgress: setProgress,
+        });
         urls.push(result.publicUrl);
+        setUploadedCount((count) => count + 1);
       }
 
       const { data: inserted, error: insertError } = await supabase
@@ -223,7 +260,7 @@ function AddForm({
           available: true,
           featured: false,
           published: false,
-          sort_order: nextSort,
+          sort_order: topSort,
         })
         .select()
         .single();
@@ -238,12 +275,15 @@ function AddForm({
       setTentInfo("");
       setPrice("");
       setFiles([]);
+      setProgress(null);
+      setUploadedCount(0);
       if (fileInputRef.current) fileInputRef.current.value = "";
       onCreated(inserted);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Creating failed.");
     } finally {
       setBusy(false);
+      setProgress(null);
     }
   }
 
@@ -307,11 +347,33 @@ function AddForm({
             onChange={(e) => pickFiles(e.target.files)}
           />
           {files.length > 0 ? (
-            <span className="admin-muted">
+            <span className="admin-hint">
               {files.map((file) => file.name).join(", ")}
             </span>
-          ) : null}
+          ) : (
+            <span className="admin-hint">
+              JPG, PNG, WebP or AVIF, up to 10 MB each. The first photo becomes
+              the card image on the website.
+            </span>
+          )}
         </label>
+
+        {busy ? (
+          <div className="admin-progress" aria-live="polite">
+            <div
+              className="admin-progress-bar"
+              style={{ width: `${Math.round((progress?.ratio ?? 0) * 100)}%` }}
+            />
+            <span className="admin-progress-label">
+              {files.length > 0
+                ? `Uploading photo ${Math.min(uploadedCount + 1, files.length)} of ${files.length}… ${
+                    progress ? formatBytes(progress.bytesUploaded) : ""
+                  }${progress ? ` / ${formatBytes(progress.bytesTotal)}` : ""}`
+                : "Saving…"}
+            </span>
+          </div>
+        ) : null}
+
         <div className="admin-row">
           <button type="button" className="admin-button" disabled={busy} onClick={() => void create()}>
             {busy ? "Creating…" : `Create ${noun} (unpublished)`}
@@ -366,7 +428,8 @@ function AccommodationCard({
       let images = row.images;
 
       if (newFile) {
-        if (!IMAGE_TYPES.includes(newFile.type)) {
+        const type = contentTypeFor(newFile);
+        if (!type || !IMAGE_TYPES.includes(type)) {
           setCardError("That file is not a supported image (JPEG, PNG, WebP or AVIF).");
           return;
         }
@@ -487,8 +550,15 @@ function AccommodationCard({
             <ul className="admin-thumbs">
               {row.images.map((url, index) => (
                 <li key={url}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt={`${row.name} photo ${index + 1}`} />
+                  {/* Preview of exactly what the public site will load: the
+                      stored Supabase URL. A missing file shows a neutral tile
+                      rather than a broken-image glyph. */}
+                  <SiteImage
+                    optimized={false}
+                    className="admin-thumb-fallback"
+                    src={url}
+                    alt={`${row.name} photo ${index + 1}`}
+                  />
                   <button
                     type="button"
                     className="admin-button admin-button-quiet"
@@ -514,7 +584,15 @@ function AccommodationCard({
             </label>
           ) : null}
           {progress ? (
-            <progress value={progress.ratio} max={1} className="admin-progress" />
+            <div className="admin-progress" aria-live="polite">
+              <div
+                className="admin-progress-bar"
+                style={{ width: `${Math.round(progress.ratio * 100)}%` }}
+              />
+              <span className="admin-progress-label">
+                {formatBytes(progress.bytesUploaded)} / {formatBytes(progress.bytesTotal)}
+              </span>
+            </div>
           ) : null}
         </div>
       </div>

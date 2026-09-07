@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 
+/** Next.js does not re-export this type from the package root, so it is
+   derived from the config type itself — which also keeps it correct across
+   Next versions. */
+type RemotePattern = NonNullable<
+  NonNullable<NextConfig["images"]>["remotePatterns"]
+>[number];
+
 /**
  * Production security headers.
  *
@@ -13,11 +20,11 @@ import type { NextConfig } from "next";
  *                                   reservation and order forms
  *   style-src    'unsafe-inline'   — inline style attributes + Turnstile-
  *                                   injected styles
- *   img-src      data:             — the inline SVG QR code at admin TOTP
- *                                   enrollment; https://*.supabase.co — menu,
- *                                   gallery and hero imagery from Supabase
- *                                   Storage; 'self' — /_next/image and the
- *                                   bundled photos under /images
+ *   img-src      data:             — next/image blur placeholders (data: URIs);
+ *                                   https://*.supabase.co — menu, gallery,
+ *                                   accommodation and hero imagery from
+ *                                   Supabase Storage; 'self' — /_next/image and
+ *                                   the bundled photos under /images
  *   media-src    https://*.supabase.co — the admin-controlled hero video
  *   connect-src  https://*.supabase.co — Supabase Auth + PostgREST + Storage
  *                                   from the browser (admin dashboard, forms)
@@ -64,6 +71,43 @@ const SECURITY_HEADERS = [
   { key: "Strict-Transport-Security", value: "max-age=31536000" },
 ];
 
+/**
+ * Admin-uploaded imagery lives in Supabase Storage, so next/image has to be
+ * told which hosts it may optimise. Without `remotePatterns`, a remote src
+ * makes next/image THROW at render time ("hostname ... is not configured
+ * under images in your next.config.js") — which is exactly how a correctly
+ * uploaded photo ends up missing from the public site.
+ *
+ * The wildcard covers any Supabase project's storage CDN
+ * (`<project-ref>.supabase.co`); the configured project URL is added too, so a
+ * local `supabase start` (http://127.0.0.1:54321) works as well.
+ */
+function remoteImagePatterns(): RemotePattern[] {
+  const patterns: RemotePattern[] = [{ protocol: "https", hostname: "**.supabase.co" }];
+
+  const configured = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (configured) {
+    try {
+      const { protocol, hostname, port } = new URL(configured);
+      if (
+        (protocol === "https:" || protocol === "http:") &&
+        !patterns.some((pattern) => pattern.hostname === hostname)
+      ) {
+        patterns.push({
+          protocol: protocol === "https:" ? "https" : "http",
+          hostname,
+          ...(port.length > 0 ? { port } : {}),
+        });
+      }
+    } catch {
+      // A malformed URL is already reported by requireSupabaseEnv at runtime;
+      // the wildcard above still covers the hosted case.
+    }
+  }
+
+  return patterns;
+}
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -72,6 +116,7 @@ const nextConfig: NextConfig = {
     // Keep the ladder tight: fewer generated variants, smaller cache, faster mobile.
     deviceSizes: [360, 414, 768, 1024, 1440, 1920],
     imageSizes: [96, 160, 240, 320, 480],
+    remotePatterns: remoteImagePatterns(),
   },
   async headers() {
     return [

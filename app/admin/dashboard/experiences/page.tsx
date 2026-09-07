@@ -8,8 +8,11 @@ export default async function ExperiencesPage(): Promise<React.JSX.Element> {
   const { data } = await supabase
     .from("experiences")
     .select("*")
+    /* Newest first: the manager inserts at the top of the display order
+       (sort_order = min - 1), and `created_at` descending breaks ties
+       between rows that share a sort_order (the seed leaves them all at 0). */
     .order("sort_order", { ascending: true })
-    .order("created_at", { ascending: true })
+    .order("created_at", { ascending: false })
     .returns<ExperienceRow[]>();
 
   return (

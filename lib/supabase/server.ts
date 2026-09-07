@@ -36,19 +36,22 @@ export async function createSupabaseServerClient() {
 }
 
 /**
- * Returns the signed-in user only if they are on the admin allow-list AND the
- * session is at AAL2 — password plus a verified TOTP challenge.
+ * Returns the signed-in user ONLY if they are on the `admin_users` allow-list.
+ *
+ * Authentication and authorization stay separate by design:
+ *
+ *   - Authentication is Supabase Auth email/password. Any account can sign in.
+ *   - Authorization is this allow-list plus RLS. Signing in proves nothing
+ *     about what you may change — a signed-in account that is not listed here
+ *     is treated exactly like a signed-out one and never reaches a dashboard.
  *
  * `getUser()` — not `getSession()`. getSession reads the cookie and trusts it;
  * getUser revalidates the JWT with Supabase. On a page that decides whether to
  * show an admin dashboard, trusting an unverified cookie is the difference
  * between an auth check and a suggestion.
  *
- * Logged in is not the same as authorized twice over: a session that has only
- * presented a password (AAL1) is treated exactly like a signed-out one. Every
- * admin has a TOTP factor by construction — the sign-in page requires enrolling
- * one before it will let anyone through — so an AAL1 session here is either a
- * half-finished sign-in or a stale cookie, and neither gets a dashboard.
+ * Membership is checked against the database, not a JWT claim, so revoking an
+ * admin takes effect on their next request rather than at token expiry.
  */
 export async function getAdminUser() {
   const supabase = await createSupabaseServerClient();
@@ -60,11 +63,6 @@ export async function getAdminUser() {
 
   if (error || !user) return null;
 
-  const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (!assurance || assurance.currentLevel !== "aal2") return null;
-
-  // Membership is checked against the database, not a JWT claim, so revoking
-  // an admin takes effect on their next request rather than at token expiry.
   const { data: admin } = await supabase
     .from("admin_users")
     .select("id, email, full_name, role")

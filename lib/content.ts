@@ -146,10 +146,25 @@ export const getMenu = cache(async (): Promise<readonly MenuCategoryData[]> => {
   try {
     const supabase = createSupabasePublicClient();
     if (!supabase) throw new Error("not configured");
+    /* `sort_order` is the owner's order; `created_at` ascending is only the
+       tie-break for rows that share one (the seed leaves them all at 0), so
+       the public order is stable instead of whatever Postgres returns. */
     const [categories, sections, items] = await Promise.all([
-      supabase.from("menu_categories").select("*").order("sort_order"),
-      supabase.from("menu_sections").select("*").order("sort_order"),
-      supabase.from("menu_items").select("*").order("sort_order"),
+      supabase
+        .from("menu_categories")
+        .select("*")
+        .order("sort_order")
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("menu_sections")
+        .select("*")
+        .order("sort_order")
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("menu_items")
+        .select("*")
+        .order("sort_order")
+        .order("created_at", { ascending: true }),
     ]);
 
     if (categories.error || sections.error || items.error) throw new Error("menu query failed");
@@ -335,7 +350,11 @@ export const getAccommodations = cache(
     try {
       const supabase = createSupabasePublicClient();
       if (!supabase) throw new Error("not configured");
-      let query = supabase.from("accommodations").select("*").order("sort_order");
+      let query = supabase
+        .from("accommodations")
+        .select("*")
+        .order("sort_order")
+        .order("created_at", { ascending: true });
       if (kind) query = query.eq("kind", kind);
       const { data, error } = await query;
       if (error || !data) return [];
@@ -377,7 +396,11 @@ async function selectAll<T>(
   try {
     const supabase = createSupabasePublicClient();
     if (!supabase) throw new Error("not configured");
-    const { data, error } = await supabase.from(table).select("*").order("sort_order");
+    const { data, error } = await supabase
+      .from(table)
+      .select("*")
+      .order("sort_order")
+      .order("created_at", { ascending: true });
     if (error || !data) return [];
     return data as T[];
   } catch {
@@ -406,6 +429,7 @@ export const getFeaturedGallery = cache(async (limit: number): Promise<GalleryIt
       .eq("published", true)
       .eq("featured", true)
       .order("sort_order")
+      .order("created_at", { ascending: true })
       .limit(limit);
     return (data ?? []) as GalleryItemRow[];
   } catch {

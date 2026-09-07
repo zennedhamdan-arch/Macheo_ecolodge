@@ -641,6 +641,171 @@ async function main() {
     check("site_content is a singleton", settings.rows.length === 1);
   }
 
+  /* ------------------------------------------------------------------ */
+  console.log("\nAdmin lists put the newest item first");
+  /* ------------------------------------------------------------------ */
+  /*
+   * The dashboard's ordering contract: the item an admin has just created is
+   * the FIRST row the list returns, decided by the database — not by the
+   * component pushing it onto an array. Each check below inserts exactly the
+   * way the matching manager does (sort_order = lowest existing minus one, see
+   * lib/adminSort.ts) and reads back with the exact ORDER BY the admin page
+   * uses, then asserts both that the new row leads and that every older row
+   * kept its place.
+   */
+
+  const ADMIN_LIST_ORDER = "order by sort_order asc, created_at desc";
+
+  async function newestIsFirst(label, { table, column, where = "", insert, expected }) {
+    const read = () =>
+      db.query(`select ${column} as value from public.${table} ${where} ${ADMIN_LIST_ORDER}`);
+    const before = (await read()).rows.map((row) => row.value);
+    await db.query(insert);
+    const after = (await read()).rows.map((row) => row.value);
+    check(
+      label,
+      after[0] === expected && after.slice(1).join("|") === before.join("|"),
+      `first row was ${after[0] ?? "nothing"}, expected ${expected}; ` +
+        `older rows ${after.slice(1).join("|") === before.join("|") ? "unchanged" : "MOVED"}`,
+    );
+  }
+
+  await newestIsFirst("a new room leads the Accommodation list", {
+    table: "accommodations",
+    column: "name",
+    where: "where kind = 'room'",
+    expected: "Brand New Room",
+    insert: `insert into public.accommodations (kind, name, sort_order)
+             values ('room', 'Brand New Room',
+                     (select coalesce(min(sort_order), 1) - 1
+                        from public.accommodations where kind = 'room'))`,
+  });
+
+  await newestIsFirst("a new camping option leads the Camping list", {
+    table: "accommodations",
+    column: "name",
+    where: "where kind = 'camping'",
+    expected: "Brand New Tent",
+    insert: `insert into public.accommodations (kind, name, sort_order)
+             values ('camping', 'Brand New Tent',
+                     (select coalesce(min(sort_order), 1) - 1
+                        from public.accommodations where kind = 'camping'))`,
+  });
+
+  await newestIsFirst("a new experience leads the Experiences list", {
+    table: "experiences",
+    column: "title",
+    expected: "Brand New Experience",
+    insert: `insert into public.experiences (title, sort_order)
+             values ('Brand New Experience',
+                     (select coalesce(min(sort_order), 1) - 1 from public.experiences))`,
+  });
+
+  await newestIsFirst("a new photo leads the Gallery list", {
+    table: "gallery_items",
+    column: "alt_text",
+    expected: "Brand New Photo",
+    insert: `insert into public.gallery_items (image_url, alt_text, sort_order)
+             values ('https://example.com/new.jpg', 'Brand New Photo',
+                     (select coalesce(min(sort_order), 1) - 1 from public.gallery_items))`,
+  });
+
+  await newestIsFirst("a new menu category leads the Restaurant tabs", {
+    table: "menu_categories",
+    column: "name",
+    expected: "Brand New Category",
+    insert: `insert into public.menu_categories (slug, name, sort_order)
+             values ('brand-new-category', 'Brand New Category',
+                     (select coalesce(min(sort_order), 1) - 1 from public.menu_categories))`,
+  });
+
+  {
+    const section = await db.query("select id from public.menu_sections limit 1");
+    const sectionId = section.rows[0].id;
+    const category = await db.query(
+      "select category_id from public.menu_sections where id = $1",
+      [sectionId],
+    );
+
+    await newestIsFirst("a new section leads its category", {
+      table: "menu_sections",
+      column: "title",
+      where: `where category_id = '${category.rows[0].category_id}'`,
+      expected: "Brand New Section",
+      insert: `insert into public.menu_sections (category_id, title, sort_order)
+               values ('${category.rows[0].category_id}', 'Brand New Section',
+                       (select coalesce(min(sort_order), 1) - 1 from public.menu_sections))`,
+    });
+
+    await newestIsFirst("a new dish leads its section", {
+      table: "menu_items",
+      column: "name",
+      where: `where section_id = '${sectionId}'`,
+      expected: "Brand New Dish",
+      insert: `insert into public.menu_items (section_id, name, sort_order)
+               values ('${sectionId}', 'Brand New Dish',
+                       (select coalesce(min(sort_order), 1) - 1 from public.menu_items))`,
+    });
+  }
+
+  await newestIsFirst("a new social link leads the Contact info list", {
+    table: "social_links",
+    column: "label",
+    expected: "Brand New Social",
+    insert: `insert into public.social_links (platform, label, url, sort_order)
+             values ('Instagram', 'Brand New Social', 'https://example.com/macheo',
+                     (select coalesce(min(sort_order), 1) - 1 from public.social_links))`,
+  });
+
+  {
+    // Rows that share a sort_order (the seed leaves them all at 0) are broken
+    // by created_at descending, so the order is deterministic rather than
+    // whatever Postgres happens to return on the day.
+    await db.query(`
+      insert into public.gallery_items (image_url, alt_text, sort_order, created_at, published)
+      values ('tie-a.jpg', 'tie-a', 4242, now() - interval '2 days', false),
+             ('tie-b.jpg', 'tie-b', 4242, now() - interval '1 day', false);
+    `);
+    const tied = await db.query(
+      `select alt_text from public.gallery_items
+        where sort_order = 4242 ${ADMIN_LIST_ORDER}`,
+    );
+    check(
+      "equal sort_order is broken by newest created_at first",
+      tied.rows.map((row) => row.alt_text).join(",") === "tie-b,tie-a",
+      JSON.stringify(tied.rows),
+    );
+  }
+
+  /* ------------------------------------------------------------------ */
+  console.log("\nStorage accepts the image types the upload screens offer");
+  /* ------------------------------------------------------------------ */
+  /*
+   * A bucket that does not list a type rejects the object at the Storage API
+   * layer — which is how a perfectly valid WebP ends up "failing to upload".
+   * The dashboard offers JPG / PNG / WebP / AVIF for gallery, menu and
+   * accommodation imagery, and JPG / PNG / WebP for hero posters.
+   */
+
+  const buckets = await db.query(
+    `select id, allowed_mime_types from storage.buckets
+      where id in ('hero', 'menu', 'gallery', 'stays')`,
+  );
+
+  for (const [bucket, required] of [
+    ["gallery", ["image/jpeg", "image/png", "image/webp", "image/avif"]],
+    ["menu", ["image/jpeg", "image/png", "image/webp", "image/avif"]],
+    ["stays", ["image/jpeg", "image/png", "image/webp", "image/avif"]],
+    ["hero", ["image/jpeg", "image/png", "image/webp"]],
+  ]) {
+    const allowed = buckets.rows.find((row) => row.id === bucket)?.allowed_mime_types ?? [];
+    check(
+      `${bucket} bucket accepts ${required.join(", ")}`,
+      required.every((type) => allowed.includes(type)),
+      `allows: ${allowed.join(", ") || "nothing"}`,
+    );
+  }
+
   console.log(`\n${passed} passed, ${failed} failed`);
   if (failed > 0) process.exit(1);
 }

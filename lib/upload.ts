@@ -38,11 +38,59 @@ export type UploadOptions = Readonly<{
   signal?: AbortSignal;
 }>;
 
-/** Filenames are namespaced by time so a re-upload never fights the CDN cache. */
+/**
+ * MIME types this site uploads, by file extension.
+ *
+ * Used only to fill in a type when the browser did not supply one — nothing
+ * here converts or re-encodes a file. A WebP is stored as a WebP, a JPG as a
+ * JPG; the bytes the admin picked are the bytes that reach Storage.
+ */
+const EXTENSION_TYPES: Readonly<Record<string, string>> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  avif: "image/avif",
+  gif: "image/gif",
+  mp4: "video/mp4",
+  webm: "video/webm",
+  mov: "video/quicktime",
+};
+
+function extensionFromName(file: File): string {
+  if (!file.name.includes(".")) return "";
+  const candidate = file.name.slice(file.name.lastIndexOf(".") + 1).toLowerCase();
+  return /^[a-z0-9]{1,5}$/.test(candidate) ? candidate : "";
+}
+
+/**
+ * The MIME type to upload with.
+ *
+ * `file.type` is usually right but is not guaranteed — some Android browsers
+ * and file pickers return an empty string. Without a type, Storage cannot
+ * match the bucket's `allowed_mime_types` and rejects a perfectly valid image
+ * (this is how a good WebP ends up "failing to upload"), so fall back to the
+ * file's own extension.
+ */
+export function contentTypeFor(file: File): string | undefined {
+  if (file.type.length > 0) return file.type;
+  return EXTENSION_TYPES[extensionFromName(file)];
+}
+
+/**
+ * Filenames are namespaced by time so a re-upload never fights the CDN cache.
+ *
+ * The extension is kept from the original file wherever it has one; when it
+ * has none (a photo handed over by a share sheet, say) it is derived from the
+ * MIME type so both the CDN's Content-Type and the bucket's allowed-type check
+ * stay correct.
+ */
 export function buildObjectPath(prefix: string, file: File): string {
-  const extension = file.name.includes(".")
-    ? file.name.slice(file.name.lastIndexOf(".") + 1).toLowerCase()
-    : "bin";
+  const fromName = extensionFromName(file);
+  const byType = Object.entries(EXTENSION_TYPES).find(
+    ([, mime]) => mime === contentTypeFor(file),
+  )?.[0];
+  const extension = fromName || byType || "bin";
   const stamp = new Date().toISOString().replace(/[^\d]/g, "").slice(0, 14);
   const random = Math.random().toString(36).slice(2, 8);
   return `${prefix}/${stamp}-${random}.${extension}`;
@@ -58,7 +106,7 @@ export async function uploadFile(
     const { error } = await supabase.storage.from(bucket).upload(path, file, {
       cacheControl: "31536000",
       upsert: false,
-      contentType: file.type || undefined,
+      contentType: contentTypeFor(file),
     });
     if (error) throw error;
 
@@ -107,7 +155,7 @@ async function uploadResumable(
       metadata: {
         bucketName: bucket,
         objectName: path,
-        contentType: file.type || "application/octet-stream",
+        contentType: contentTypeFor(file) ?? "application/octet-stream",
         cacheControl: "31536000",
       },
       onError: reject,

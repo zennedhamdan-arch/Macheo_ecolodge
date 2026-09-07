@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import SiteImage from "@/components/SiteImage";
 import { getFeaturedGallery, getGalleryItems } from "@/lib/content";
 import type { GalleryItemRow } from "@/lib/supabase/types";
 import { gallery as galleryCopy } from "@/data/site";
@@ -53,7 +53,7 @@ export default async function PhotoShowcase(): Promise<React.JSX.Element> {
         <ul className={styles.grid}>
           {rows.map((row) => (
             <li key={row.id} className={styles.frame}>
-              <Image
+              <SiteImage
                 src={row.image_url}
                 alt={altFor(row)}
                 fill
@@ -67,7 +67,7 @@ export default async function PhotoShowcase(): Promise<React.JSX.Element> {
         <ul className={styles.grid}>
           {STATIC_SELECTION.map((img) => (
             <li key={img.src} className={styles.frame}>
-              <Image src={img.src} alt={img.alt} fill sizes="(max-width: 700px) 50vw, 33vw" />
+              <SiteImage src={img.src} alt={img.alt} fill sizes="(max-width: 700px) 50vw, 33vw" />
             </li>
           ))}
         </ul>

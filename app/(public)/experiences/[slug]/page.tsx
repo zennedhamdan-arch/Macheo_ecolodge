@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import SiteImage from "@/components/SiteImage";
 import { getExperiences, getLodge, formatPrice, slugify } from "@/lib/content";
 import styles from "@/components/ListingPage.module.css";
 
@@ -57,7 +57,7 @@ export default async function ExperienceDetailPage({
           <div className={styles.detailMedia}>
             {row.image_url ? (
               <div className={styles.detailImage}>
-                <Image
+                <SiteImage
                   src={row.image_url}
                   alt={row.title}
                   fill

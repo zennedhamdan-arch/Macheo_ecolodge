@@ -8,8 +8,11 @@ export default async function GalleryPage(): Promise<React.JSX.Element> {
   const { data } = await supabase
     .from("gallery_items")
     .select("*")
+    /* Newest first: uploads land at the top of the display order
+       (sort_order = min - 1); `created_at` descending breaks ties between
+       rows that share a sort_order. */
     .order("sort_order", { ascending: true })
-    .order("created_at", { ascending: true })
+    .order("created_at", { ascending: false })
     .returns<GalleryItemRow[]>();
 
   return (

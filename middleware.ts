@@ -78,11 +78,10 @@ export async function middleware(request: NextRequest) {
   }
 
   // NOTE: a signed-in user on /admin/login is NOT bounced to the dashboard
-  // here. "Signed in" only means AAL1 (a password); the dashboard requires
-  // AAL2 (password + TOTP). Bouncing here would ping-pong an AAL1 session
-  // between this route and the dashboard's own check, forever. The login
-  // page itself redirects fully-verified (AAL2) admins — see its getAdminUser
-  // call — which is the only session that has nothing left to prove.
+  // here. Middleware can only see that a cookie exists; whether that session
+  // belongs to an allow-listed admin is decided by getAdminUser() (and by RLS
+  // behind it). The login page itself redirects allow-listed admins — see its
+  // getAdminUser call — which keeps the authorization check in one place.
 
   return response;
 }

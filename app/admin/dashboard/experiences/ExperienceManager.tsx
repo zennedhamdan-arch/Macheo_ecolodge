@@ -3,9 +3,16 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import SiteImage from "@/components/SiteImage";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { ExperienceCategory, ExperienceRow } from "@/lib/supabase/types";
-import { buildObjectPath, uploadFile, type UploadProgress } from "@/lib/upload";
+import { topSortOrder } from "@/lib/adminSort";
+import {
+  buildObjectPath,
+  contentTypeFor,
+  uploadFile,
+  type UploadProgress,
+} from "@/lib/upload";
 
 /**
  * Experiences manager.
@@ -55,7 +62,6 @@ export default function ExperienceManager({
     setBusyId("new");
     try {
       const supabase = createSupabaseBrowserClient();
-      const nextSort = rows.reduce((max, row) => Math.max(max, row.sort_order), -1) + 1;
       const { data: inserted, error: insertError } = await supabase
         .from("experiences")
         .insert({
@@ -65,19 +71,21 @@ export default function ExperienceManager({
           price: price.trim().length > 0 ? Number(price.trim()) : null,
           category: category.trim().length > 0 ? (category as ExperienceCategory) : null,
           active: true,
-          sort_order: nextSort,
+          /* Lowest sort_order minus one: the new experience is the first card
+             in this list (and on the public page) until the owner reorders. */
+          sort_order: topSortOrder(rows),
         })
         .select()
         .single();
       if (insertError) throw insertError;
 
-      setRows((current) => [...current, inserted]);
+      setRows((current) => [inserted, ...current]);
       setTitle("");
       setDescription("");
       setDuration("");
       setPrice("");
       setCategory("");
-      setStatus("Experience added — it is live on the site.");
+      setStatus("Experience added — it is at the top of the list and live on the site.");
       router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Adding failed.");
@@ -283,7 +291,8 @@ function ExperienceCard({
     category !== (row.category ?? "");
 
   async function uploadImage(file: File): Promise<void> {
-    if (!IMAGE_TYPES.includes(file.type)) {
+    const type = contentTypeFor(file);
+    if (!type || !IMAGE_TYPES.includes(type)) {
       setErrorShared("Please choose a JPG, PNG, WebP or AVIF image.");
       return;
     }
@@ -319,8 +328,7 @@ function ExperienceCard({
     <li className="admin-list-item">
       <div className="admin-list-item-row">
         {row.image_url ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img className="admin-thumb" src={row.image_url} alt={row.title} loading="lazy" />
+          <SiteImage optimized={false} className="admin-thumb" src={row.image_url} alt={row.title} />
         ) : (
           <span className="admin-thumb admin-thumb-empty">No photo</span>
         )}

@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import SiteImage from "@/components/SiteImage";
 import type { AccommodationRow } from "@/lib/supabase/types";
 import { formatPrice } from "@/lib/content";
 import styles from "./ListingPage.module.css";
@@ -35,7 +35,7 @@ export default function AccommodationDetail({
           <div className={styles.detailMedia}>
             {lead ? (
               <div className={styles.detailImage}>
-                <Image
+                <SiteImage
                   src={lead}
                   alt={`${row.name} at Macheo Ecolodge & Camping`}
                   fill
@@ -48,7 +48,7 @@ export default function AccommodationDetail({
               <div className={styles.thumbRow}>
                 {rest.map((src, index) => (
                   <div key={`${src}-${index}`} className={styles.thumb}>
-                    <Image
+                    <SiteImage
                       src={src}
                       alt={`${row.name} — photo ${index + 2}`}
                       fill

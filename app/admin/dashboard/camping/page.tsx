@@ -13,7 +13,9 @@ export default async function AdminCampingPage(): Promise<React.JSX.Element> {
     .from("accommodations")
     .select("*")
     .eq("kind", "camping")
-    .order("sort_order")
+    // Newest first — same ordering contract as the accommodation manager.
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: false })
     .returns<AccommodationRow[]>();
 
   return (

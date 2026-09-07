@@ -17,7 +17,23 @@
   backdrop-filter: blur(6px);
 }
 
+/* Mobile menu layering, part 1.
+   `backdrop-filter` (like `filter` and `transform`) makes this element the
+   containing block for its fixed-position descendants. The solid state only
+   switches on after ~48px of scroll, so the moment a visitor scrolled and
+   then opened the menu, the full-viewport panel would be measured against
+   the ~72px bar and squash into the top strip. While the menu is open the
+   blur is dropped — the panel covers the bar's background anyway. */
+.header[data-open="true"] {
+  background: var(--mk-forest-950);
+  backdrop-filter: none;
+}
+
 .bar {
+  /* Mobile menu layering, part 2: the bar (brand + close button) sits above
+     the open panel, which is a sibling at z-index 1. */
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: 1.25rem;
@@ -193,7 +209,9 @@
 .panel {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  /* Inside the header's own stacking context (z-index 100), so it covers the
+     page and the floating WhatsApp button (90) but stays under the bar. */
+  z-index: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;

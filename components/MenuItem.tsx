@@ -1,5 +1,4 @@
-import Image from "next/image";
-
+import SiteImage from "@/components/SiteImage";
 import type { MenuItem } from "@/data/menu";
 import styles from "./MenuItem.module.css";
 
@@ -28,20 +27,13 @@ export default function MenuItemRow({
     <li className={styles.item} data-layout={layout} id={item.id}>
       {layout === "cards" ? (
         <div className={styles.media}>
-          {item.image ? (
-            <Image
-              src={item.image}
-              alt={item.name}
-              fill
-              className={styles.image}
-              sizes="(min-width: 1024px) 320px, (min-width: 768px) 40vw, 88vw"
-              loading="lazy"
-            />
-          ) : (
-            <span className={styles.mediaFallback} aria-hidden="true">
-              {item.name.charAt(0)}
-            </span>
-          )}
+          <SiteImage
+            src={item.image}
+            alt={item.name}
+            fill
+            className={styles.image}
+            sizes="(min-width: 1024px) 320px, (min-width: 768px) 40vw, 88vw"
+          />
         </div>
       ) : null}
 

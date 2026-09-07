@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 
+import SiteImage from "./SiteImage";
 import GalleryLightbox, { type GalleryPhoto } from "./GalleryLightbox";
 import styles from "./GalleryGrid.module.css";
 
@@ -114,15 +115,14 @@ export default function GalleryGrid({ items, emptyMessage }: Props): React.JSX.E
                 ref={index === 0 ? openerRef : undefined}
                 aria-label={`Open photo: ${item.alt}`}
               >
-                {/* Admin-uploaded photos on Supabase's CDN; next/image would need
-                  remotePatterns config and buy nothing on a masonry grid. */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                {/* A plain <img> (next/image would buy nothing on a masonry
+                    grid) wrapped in SiteImage so a missing object shows a
+                    clean tile instead of a broken-image glyph. */}
+                <SiteImage
+                  optimized={false}
                   className={styles.photo}
                   src={item.src}
                   alt={item.alt}
-                  loading="lazy"
-                  decoding="async"
                 />
                 {item.caption ? <span className={styles.photoCaption}>{item.caption}</span> : null}
               </button>

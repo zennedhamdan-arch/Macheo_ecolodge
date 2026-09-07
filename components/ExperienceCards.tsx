@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import SiteImage from "@/components/SiteImage";
 import type { ExperienceRow } from "@/lib/supabase/types";
 import { formatPrice, slugify } from "@/lib/content";
 import styles from "./ExperienceCards.module.css";
@@ -40,16 +40,12 @@ export default function ExperienceCards({
         return (
           <li key={row.id} className={styles.card}>
             <Link href={`/experiences/${slug}`} className={styles.media}>
-              {row.image_url ? (
-                <Image
-                  src={row.image_url}
-                  alt={row.title}
-                  fill
-                  sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
-                />
-              ) : (
-                <span className={styles.mediaFallback} aria-hidden="true" />
-              )}
+              <SiteImage
+                src={row.image_url}
+                alt={row.title}
+                fill
+                sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
+              />
               {row.category ? (
                 <span className={styles.chip}>{row.category}</span>
               ) : null}
