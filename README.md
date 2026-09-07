@@ -114,9 +114,13 @@ are separate questions.
   its `status` or `admin_notes`; contact messages are write-only.
 - Uploads go through Postgres Storage policies (`gallery`, `hero`, `menu`,
   `stays` buckets) — only allow-listed admins may write.
-- CSP, strict security headers, Turnstile on public forms — fail-closed:
-  without Turnstile keys the forms refuse to submit instead of running
-  unprotected, and tell the guest exactly that.
+- CSP and strict security headers on every response.
+- Turnstile on the public forms is **optional** (a demo should be submittable
+  out of the box). With no site key configured the check is skipped; once a
+  site key is set it is enforced, and a site key without a secret fails
+  **closed** rather than trusting an unverified token. Either way the routes
+  validate every field server-side and write with the anon key, so RLS and the
+  column grants are what actually protect the data.
 - The full matrix — anonymous visitor, signed-up intruder, allow-listed
   admin — is asserted by `npm run db:test` (76 checks, in-process Postgres),
   along with the admin list-ordering contract and the image types each
