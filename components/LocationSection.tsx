@@ -1,20 +1,22 @@
 import { lodge } from "@/data/macheo";
 import { locationSection, SECTION_IDS } from "@/data/site";
 import { directionsAction } from "@/lib/actions";
-import { getLodge, getSiteContent } from "@/lib/content";
+import { getLodge, getMapEmbedUrl } from "@/lib/content";
 import styles from "./LocationSection.module.css";
 
 /**
- * Where Macheo is, and how to get there.
+ * Where Macheo is, and how to get there — the homepage and the About page
+ * share this one section, so there is a single map, one set of words and one
+ * directions link to keep correct.
  *
- * The Google Maps embed appears ONLY once an embed URL is confirmed and saved
- * in Site content — until then the section shows the location words and a
- * directions link (when configured), never a guessed pin.
+ * The embed is the owner-confirmed Google Maps place, overridable from
+ * Admin → Site content (see `getMapEmbedUrl`). If neither exists the section
+ * falls back to the drawn placeholder: the location words and a directions
+ * link, never a guessed pin.
  */
 export default async function LocationSection(): Promise<React.JSX.Element> {
-  const [business, content] = await Promise.all([getLodge(), getSiteContent()]);
+  const [business, mapUrl] = await Promise.all([getLodge(), getMapEmbedUrl()]);
 
-  const mapUrl = content.map_embed_url;
   const facilities = lodge.facilities;
 
   return (
@@ -59,7 +61,7 @@ export default async function LocationSection(): Promise<React.JSX.Element> {
                 title={`Map showing the location of ${business.name}`}
                 className={styles.map}
                 loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
+                referrerPolicy="strict-origin-when-cross-origin"
                 allowFullScreen
               />
             ) : (

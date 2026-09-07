@@ -47,10 +47,16 @@ env vars from `.env.example`).
 | `/experiences` · `/experiences/[slug]` | Boat trips, cycling, village walks… filterable by category |
 | `/restaurant` | Restaurant & bar with the menu (tabbed, accessible) |
 | `/gallery` | Full collection: categories, lightbox, lazy loading, pagination |
-| `/about` | The place and the philosophy — admin-editable copy |
-| `/contact` | Contact details, map (only when confirmed), message form |
+| `/about` | The place and the philosophy — admin-editable copy, closing with the map |
+| `/contact` | Contact details and the message form |
 | `/reservation` | The primary CTA destination — reservation *request* form |
 | `/privacy` · `/terms` | Legal pages |
+
+**Location**: the owner-confirmed Google Maps pin lives in `data/macheo.ts`
+(`mapEmbedUrl`) and renders in the shared location section on the homepage and
+the About page; the footer links to it ("View the map") and to Google Maps
+directions. Admin → Site content → *Google Maps embed URL* overrides it, and
+leaving that field empty keeps the built-in pin.
 
 Primary CTA everywhere: **PLAN YOUR STAY → /reservation** (never the contact
 page). Secondary: **EXPLORE MACHEO**. A floating WhatsApp button appears on

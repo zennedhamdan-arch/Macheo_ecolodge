@@ -47,9 +47,11 @@ npm run db:test        # security matrix
 npm run seed:generate  # regenerate seed from data/ (uses tsx, Node-20 safe)
 ```
 
-Static mode behaviour (no env vars): `data/*.ts` fallbacks power every page,
-forms show an honest "temporarily unavailable" note, the WhatsApp button and
-map embed hide themselves, `/admin*` redirects to `/admin/unavailable`.
+Static mode behaviour (no env vars): `data/*.ts` fallbacks power every page —
+including the confirmed Google Maps embed, which now renders without a
+database — forms show an honest "temporarily unavailable" note, the WhatsApp
+button hides itself (no number confirmed), and `/admin*` redirects to
+`/admin/unavailable`.
 
 With Supabase configured (`.env.local` from `.env.example`), everything is
 database-driven. The seed ships quiet on purpose: unpublished accommodation,

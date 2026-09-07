@@ -14,6 +14,9 @@
  *   - Facilities: lake & mountain views, garden, terrace, Wi-Fi, parking,
  *     bicycle activities, water activities, nature experiences,
  *     proximity to the Congo-Nile Trail
+ *   - Exact location: the Google Maps place "Macheo Ecolodge-camping"
+ *     (Karongi), supplied by the owner as an embed — see MAP_EMBED_URL below.
+ *     This is why the map now renders on the site instead of the placeholder.
  *
  * Everything else (phone numbers, email, exact street, opening hours, prices,
  * room inventory) is NOT confirmed and therefore `null` here. The UI degrades
@@ -54,7 +57,14 @@ export type LodgeData = Readonly<{
   whatsapp: Readonly<{ display: string; e164: string; href: string }> | null;
   email: string | null;
   website: string | null;
+  /** Google Maps link for this exact place — "Get Directions" everywhere. */
   directionsUrl: string | null;
+  /**
+   * Google Maps EMBED src for the location section (homepage + About).
+   * Admin → Site content → "Google Maps embed URL" overrides it; leaving that
+   * field empty keeps this confirmed pin rather than removing the map.
+   */
+  mapEmbedUrl: string | null;
   /** Opening hours: null until the business confirms them. */
   hours: readonly WeekdayHours[];
   socials: readonly SocialLink[];
@@ -79,7 +89,14 @@ export const lodge: LodgeData = {
   whatsapp: null, // not confirmed — admins add it under Contact information
   email: null, // not confirmed
   website: null,
-  directionsUrl: null, // embedded map and directions appear once confirmed
+  // The owner supplied this Google Maps place ("Macheo Ecolodge-camping",
+  // Karongi) as an embed, so both the map and the directions link are real.
+  // The link uses the documented Maps URLs search action; the pin in the
+  // embed below is the authoritative marker.
+  directionsUrl:
+    "https://www.google.com/maps/search/?api=1&query=Macheo%20Ecolodge-camping%2C%20Karongi%2C%20Rwanda",
+  mapEmbedUrl:
+    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3987.2427230012677!2d29.349730800000003!3d-2.0588439000000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x19dd296aca70b895%3A0x6ed582940f63f074!2sMacheo%20Ecolodge-camping!5e0!3m2!1sen!2srw!4v1788793413023!5m2!1sen!2srw",
   hours: [], // not confirmed
   socials: [], // managed in the dashboard (Site content → Social links)
   about: [

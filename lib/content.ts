@@ -340,6 +340,22 @@ export const getSiteContent = cache(async (): Promise<Partial<SiteContentRow>> =
   }
 });
 
+/**
+ * The Google Maps embed shown in the location section (homepage and About).
+ *
+ * Admin → Site content → "Google Maps embed URL" wins when it is set; an
+ * empty field falls back to the owner-confirmed embed in `data/macheo.ts`
+ * rather than taking the map away — the same "empty means keep the default"
+ * rule the rest of the dashboard follows. `null` (no default and nothing
+ * saved) leaves the drawn placeholder in place, never a guessed pin.
+ */
+export const getMapEmbedUrl = cache(async (): Promise<string | null> => {
+  const content = await getSiteContent();
+  const saved = content.map_embed_url;
+  if (typeof saved === "string" && saved.trim().length > 0) return saved.trim();
+  return staticLodge.mapEmbedUrl;
+});
+
 /* -------------------------------------------------------------------------- */
 /* Accommodations (rooms + camping)                                           */
 /* -------------------------------------------------------------------------- */

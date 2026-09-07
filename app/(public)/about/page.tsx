@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+import LocationSection from "@/components/LocationSection";
 import PageHero from "@/components/PageHero";
 import { getSiteContent } from "@/lib/content";
 import { lodge } from "@/data/macheo";
@@ -148,6 +149,9 @@ export default async function AboutPage(): Promise<React.JSX.Element> {
           </div>
         </div>
       </section>
+
+      {/* Where it is — the same confirmed map the homepage shows. */}
+      <LocationSection />
     </main>
   );
 }
