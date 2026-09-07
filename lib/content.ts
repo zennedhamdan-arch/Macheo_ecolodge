@@ -146,25 +146,27 @@ export const getMenu = cache(async (): Promise<readonly MenuCategoryData[]> => {
   try {
     const supabase = createSupabasePublicClient();
     if (!supabase) throw new Error("not configured");
-    /* `sort_order` is the owner's order; `created_at` ascending is only the
-       tie-break for rows that share one (the seed leaves them all at 0), so
-       the public order is stable instead of whatever Postgres returns. */
+    /* `sort_order` ascending is the owner's manual order; `created_at`
+       DESCENDING is the tie-break for rows that share one (the seed leaves
+       them all at 0), so the newest item wins — the same rule the dashboard
+       lists use, which keeps the public page and the admin list in the same
+       order and puts anything just created at the top. */
     const [categories, sections, items] = await Promise.all([
       supabase
         .from("menu_categories")
         .select("*")
-        .order("sort_order")
-        .order("created_at", { ascending: true }),
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false }),
       supabase
         .from("menu_sections")
         .select("*")
-        .order("sort_order")
-        .order("created_at", { ascending: true }),
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false }),
       supabase
         .from("menu_items")
         .select("*")
-        .order("sort_order")
-        .order("created_at", { ascending: true }),
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false }),
     ]);
 
     if (categories.error || sections.error || items.error) throw new Error("menu query failed");
@@ -369,8 +371,8 @@ export const getAccommodations = cache(
       let query = supabase
         .from("accommodations")
         .select("*")
-        .order("sort_order")
-        .order("created_at", { ascending: true });
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false });
       if (kind) query = query.eq("kind", kind);
       const { data, error } = await query;
       if (error || !data) return [];
@@ -415,8 +417,8 @@ async function selectAll<T>(
     const { data, error } = await supabase
       .from(table)
       .select("*")
-      .order("sort_order")
-      .order("created_at", { ascending: true });
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
     if (error || !data) return [];
     return data as T[];
   } catch {
@@ -444,8 +446,8 @@ export const getFeaturedGallery = cache(async (limit: number): Promise<GalleryIt
       .select("*")
       .eq("published", true)
       .eq("featured", true)
-      .order("sort_order")
-      .order("created_at", { ascending: true })
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false })
       .limit(limit);
     return (data ?? []) as GalleryItemRow[];
   } catch {
