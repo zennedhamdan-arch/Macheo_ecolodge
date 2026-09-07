@@ -169,14 +169,21 @@ export default function GalleryManager({
     setError(null);
     try {
       const supabase = createSupabaseBrowserClient();
-      await Promise.all(
+      /* supabase-js resolves with `{ error }` rather than throwing, so these
+         results have to be inspected — otherwise a rejected reorder would
+         report success and the list would spring back on the next load. */
+      const responses = await Promise.all(
         renumbered.map((row) =>
           row.sort_order === rows.find((old) => old.id === row.id)?.sort_order
-            ? Promise.resolve()
+            ? Promise.resolve(null)
             : supabase.from("gallery_items").update({ sort_order: row.sort_order }).eq("id", row.id),
         ),
       );
+      const failure = responses.find((response) => response?.error);
+      if (failure?.error) throw failure.error;
+
       setRows(renumbered);
+      setStatus("Order saved.");
       router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Reordering failed.");

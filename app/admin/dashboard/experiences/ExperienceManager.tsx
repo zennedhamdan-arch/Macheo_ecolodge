@@ -125,14 +125,20 @@ export default function ExperienceManager({
     setError(null);
     try {
       const supabase = createSupabaseBrowserClient();
-      await Promise.all(
+      /* Checked, not fire-and-forget: supabase-js resolves with `{ error }`,
+         so an ignored result would look like a saved order. */
+      const responses = await Promise.all(
         renumbered.map((row) =>
           row.sort_order === rows.find((old) => old.id === row.id)?.sort_order
-            ? Promise.resolve()
+            ? Promise.resolve(null)
             : supabase.from("experiences").update({ sort_order: row.sort_order }).eq("id", row.id),
         ),
       );
+      const failure = responses.find((response) => response?.error);
+      if (failure?.error) throw failure.error;
+
       setRows(renumbered);
+      setStatus("Order saved.");
       router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Reordering failed.");

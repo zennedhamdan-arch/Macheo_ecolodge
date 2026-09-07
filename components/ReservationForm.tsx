@@ -428,15 +428,10 @@ export default function ReservationForm({
         </label>
       </fieldset>
 
-      {siteKey ? (
-        <Turnstile siteKey={siteKey} onToken={setTurnstileToken} />
-      ) : (
-        <p className="captcha-note">
-          Anti-bot protection is not configured on this server — submissions
-          may be disabled. If the form does not work, please call or WhatsApp
-          us instead.
-        </p>
-      )}
+      {/* The anti-bot widget renders only when a site key is configured;
+          without one the form submits normally (the API skips the token
+          check) and nothing here needs to warn the guest. */}
+      {siteKey ? <Turnstile siteKey={siteKey} onToken={setTurnstileToken} /> : null}
 
       {errorMessage ? (
         <p className={styles.error} role="alert">
